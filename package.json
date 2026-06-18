@@ -1,0 +1,21 @@
+{
+  "name": "swipe-specials",
+  "version": "1.0.0",
+  "description": "约会软件风格的左滑右滑 App，浏览 Coles / Woolworths 打折商品并加入购物清单",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "vue": "^3.4.27",
+    "vuetify": "^3.6.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.2.11",
+    "vite-plugin-vuetify": "^2.0.3"
+  }
+}
