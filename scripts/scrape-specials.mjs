@@ -60,8 +60,11 @@ const round2 = (n) => Math.round(n * 100) / 100
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-// 单次请求超时 / 最大重试次数（应对 Akamai 反爬偶发性丢弃/重置连接）
-const FETCH_TIMEOUT_MS = 15000
+// 单次请求超时 / 最大重试次数（应对 Akamai 反爬偶发性丢弃/重置连接）。
+// 经住宅代理时单请求常需 30-70s（代理内部会轮换/重试出口 IP），故代理模式下
+// 默认放宽到 70s；可用 SCRAPE_TIMEOUT_MS 覆盖。直连模式保持 15s。
+const PROXY_ON = !!(env.SCRAPE_PROXY || '').trim()
+const FETCH_TIMEOUT_MS = Number(env.SCRAPE_TIMEOUT_MS) || (PROXY_ON ? 70000 : 15000)
 const MAX_RETRIES = 3
 
 // 住宅代理（可选）。
