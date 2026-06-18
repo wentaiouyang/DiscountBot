@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -7,19 +7,19 @@
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#FBF2EC" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0E0D17" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#EEEFF2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0A0A0D" media="(prefers-color-scheme: dark)" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="SwipeSpecials" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-    <!-- Fonts: Fredoka (display) + Nunito (body) -->
+    <!-- Fonts: Space Grotesk (display, tight modern grotesk) + Manrope (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
@@ -30,8 +30,8 @@
         --safe-bottom: env(safe-area-inset-bottom, 0px);
 
         /* ---- 字体 ---- */
-        --font-display: 'Fredoka', system-ui, -apple-system, sans-serif;
-        --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+        --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+        --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
 
         /* ---- 主题强调色（默认 = 全部·暖橙；随门店切换为 Coles 红 / Woolies 绿，由 JS 设置）---- */
         --accent: #F2740C;
@@ -50,57 +50,58 @@
         --nope: #FF3D5E;
       }
 
-      /* ===== 浅色主题 ===== */
-      :root,
+      /* ===== 浅色主题（冷调干净）===== */
       [data-theme='light'] {
         color-scheme: light;
-        --bg-solid: #FBF2EC;
-        --blob-neutral: rgba(120, 96, 64, 0.07);
+        --bg-solid: #ECEEF2;
+        --blob-neutral: rgba(12, 14, 24, 0.05);
 
         --surface: #FFFFFF;
-        --surface-2: #FFF7F2;
-        --surface-sunken: #F6EFE9;
-        --border: rgba(28, 20, 40, 0.08);
-        --border-strong: rgba(28, 20, 40, 0.14);
+        --surface-2: #F5F6F9;
+        --surface-sunken: #ECEEF2;
+        --border: rgba(12, 14, 24, 0.10);
+        --border-strong: rgba(12, 14, 24, 0.16);
 
-        --text: #1C1428;
-        --text-muted: #7C7488;
-        --text-faint: #ADA5B8;
+        --text: #0E0F16;
+        --text-muted: #5E6270;
+        --text-faint: #9AA0AD;
 
-        --save-bg: #FFEDC9;
-        --save-text: #B26A00;
-        --discount-bg: #15101F;
-        --discount-text: #FFD84D;
+        --save-bg: rgba(18, 184, 119, 0.14);
+        --save-text: #0A8F5A;
+        --discount-bg: #0E0F16;
+        --discount-text: #FFFFFF;
 
-        --shadow-card: 0 22px 48px -16px rgba(28, 20, 40, 0.22), 0 10px 24px rgba(28, 20, 40, 0.10);
-        --shadow-soft: 0 10px 30px rgba(28, 20, 40, 0.10);
+        --shadow-card: 0 24px 50px -20px rgba(12, 14, 24, 0.28), 0 10px 22px -10px rgba(12, 14, 24, 0.12);
+        --shadow-soft: 0 10px 30px rgba(12, 14, 24, 0.10);
         --shadow-pop: var(--accent-glow);
+        --card-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
       }
 
-      /* ===== 深色主题 ===== */
+      /* ===== 深色主题（冷调炭黑·高对比·默认；data-theme 始终存在于 <html>）===== */
       [data-theme='dark'] {
         color-scheme: dark;
-        --bg-solid: #0E0D17;
-        --blob-neutral: rgba(255, 255, 255, 0.05);
+        --bg-solid: #0A0A0D;
+        --blob-neutral: rgba(255, 255, 255, 0.04);
 
-        --surface: #1A1726;
-        --surface-2: #221E32;
-        --surface-sunken: #14111F;
-        --border: rgba(255, 255, 255, 0.09);
-        --border-strong: rgba(255, 255, 255, 0.16);
+        --surface: #15151B;
+        --surface-2: #1D1D25;
+        --surface-sunken: #0F0F13;
+        --border: rgba(255, 255, 255, 0.10);
+        --border-strong: rgba(255, 255, 255, 0.18);
 
-        --text: #F4F1FB;
-        --text-muted: #A49DBA;
-        --text-faint: #6E6884;
+        --text: #F4F5F8;
+        --text-muted: #9C9DA8;
+        --text-faint: #5C5D69;
 
-        --save-bg: rgba(255, 184, 0, 0.16);
-        --save-text: #FFCB57;
-        --discount-bg: #FFD84D;
-        --discount-text: #15101F;
+        --save-bg: rgba(43, 224, 138, 0.16);
+        --save-text: #36E08F;
+        --discount-bg: #F4F5F8;
+        --discount-text: #0A0A0D;
 
-        --shadow-card: 0 24px 54px -16px rgba(0, 0, 0, 0.66), 0 0 0 1px rgba(255, 255, 255, 0.04);
-        --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.5);
+        --shadow-card: 0 30px 64px -20px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.6);
         --shadow-pop: var(--accent-glow);
+        --card-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
       }
 
       html, body {

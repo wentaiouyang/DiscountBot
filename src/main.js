@@ -8,7 +8,7 @@ import '@mdi/font/css/materialdesignicons.css'
 
 const vuetify = createVuetify({
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: 'dark',
     themes: {
       light: {
         dark: false,
@@ -18,7 +18,7 @@ const vuetify = createVuetify({
           like: '#12B877',
           nope: '#FF3D5E',
           surface: '#FFFFFF',
-          background: '#FBF2EC',
+          background: '#ECEEF2',
         },
       },
       dark: {
@@ -28,8 +28,8 @@ const vuetify = createVuetify({
           secondary: '#3FB36B',
           like: '#2BE08A',
           nope: '#FF6B82',
-          surface: '#1A1726',
-          background: '#0E0D17',
+          surface: '#15151B',
+          background: '#0A0A0D',
         },
       },
     },

@@ -22,10 +22,21 @@ let startY = 0
 let pointerId = null
 
 const imgError = ref(false)
+const imgLoaded = ref(false)
 
 const storeColor = computed(() =>
   props.product.store === 'Coles' ? '#E5231B' : '#178841'
 )
+
+// 媒体区底色：有图时给一层极淡的门店色渐变衬底（商品图多为白底，
+// 衬底让图片不再「浮」在纯白上）；无图/加载失败时用更明显的门店色光晕承托 emoji。
+const mediaBg = computed(() => {
+  const c = storeColor.value
+  if (imgError.value || !props.product.image) {
+    return `radial-gradient(circle at 50% 36%, ${c}30, ${c}0d 68%)`
+  }
+  return `linear-gradient(180deg, #ffffff 0%, ${c}12 100%)`
+})
 
 // 拖动时卡片的变换（含旋转）。z-index 让「当前可操作卡片」始终位于卡堆最上层，
 // 否则后渲染的背景预览卡会覆盖在上面、拦截指针事件，导致无法拖动。
@@ -42,8 +53,9 @@ const cardStyle = computed(() => {
   if (!props.active) {
     const base = props.depth
     return {
-      transform: `translateY(${base * 10}px) scale(${1 - base * 0.04})`,
-      transition: 'transform .25s ease',
+      transform: `translateY(${base * 13}px) scale(${1 - base * 0.05})`,
+      transition: 'transform .3s ease, opacity .3s ease',
+      opacity: 1 - base * 0.14,
       zIndex: 20 - base,
     }
   }
@@ -105,12 +117,16 @@ defineExpose({ fly })
     @pointercancel="onPointerUp"
   >
     <!-- 图片 / 占位 -->
-    <div class="card-media" :style="{ background: imgError || !product.image ? `linear-gradient(135deg, ${storeColor}22, ${storeColor}66)` : '#fff' }">
+    <div class="card-media" :style="{ background: mediaBg }">
+      <!-- 图片加载前的骨架微光，避免空白闪烁 -->
+      <div v-if="product.image && !imgError && !imgLoaded" class="media-skeleton" aria-hidden="true"></div>
       <img
         v-if="product.image && !imgError"
         :src="product.image"
         :alt="product.name"
         draggable="false"
+        :class="{ ready: imgLoaded }"
+        @load="imgLoaded = true"
         @error="imgError = true"
       />
       <span v-else class="emoji">{{ product.emoji }}</span>
@@ -150,8 +166,8 @@ defineExpose({ fly })
   height: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 26px;
-  box-shadow: var(--shadow-card);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card), var(--card-sheen);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -171,12 +187,48 @@ defineExpose({ fly })
   justify-content: center;
   overflow: hidden;
 }
+/* 顶部柔光：一层从上而下的高光，给媒体区一点曲面质感 */
+.card-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 22%);
+}
+[data-theme='dark'] .card-media::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 22%);
+}
 .card-media img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   padding: 16px;
   pointer-events: none;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity .35s ease, transform .45s cubic-bezier(.18,.89,.32,1.28);
+}
+.card-media img.ready { opacity: 1; transform: scale(1); }
+/* 图片加载骨架：斜向流光 */
+.media-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--surface-sunken) 60%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 220% 100%;
+  animation: media-shimmer 1.25s ease-in-out infinite;
+}
+@keyframes media-shimmer {
+  from { background-position: 180% 0; }
+  to   { background-position: -60% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .media-skeleton { animation: none; }
+  .card-media img { transition: opacity .2s ease; transform: none; }
 }
 .emoji {
   font-size: 110px;
@@ -186,33 +238,37 @@ defineExpose({ fly })
   position: absolute;
   top: 14px;
   left: 14px;
+  z-index: 2;
   color: #fff;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 12.5px;
-  padding: 5px 13px;
-  border-radius: 999px;
-  letter-spacing: .4px;
-  box-shadow: 0 6px 16px rgba(0,0,0,.22);
-  backdrop-filter: blur(2px);
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: 8px;
+  letter-spacing: 1px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.3);
 }
 .discount-badge {
   position: absolute;
   top: 14px;
   right: 14px;
+  z-index: 2;
   background: var(--accent-grad);
   color: #fff;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 16px;
-  padding: 6px 13px;
-  border-radius: 14px;
-  box-shadow: var(--shadow-pop);
+  font-size: 17px;
+  letter-spacing: -0.4px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-pop), inset 0 1px 0 rgba(255,255,255,.4);
   font-variant-numeric: tabular-nums;
 }
 .stamp {
   position: absolute;
   top: 28px;
+  z-index: 3;
   font-family: var(--font-display);
   font-size: 27px;
   font-weight: 700;
@@ -221,7 +277,8 @@ defineExpose({ fly })
   border: 4px solid;
   transform: rotate(-15deg);
   pointer-events: none;
-  background: rgba(255,255,255,.82);
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
   backdrop-filter: blur(2px);
 }
 .stamp.like {
@@ -244,8 +301,8 @@ defineExpose({ fly })
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.2px;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -254,9 +311,10 @@ defineExpose({ fly })
 }
 .size {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  margin: 3px 0 10px;
+  letter-spacing: .2px;
+  margin: 4px 0 12px;
 }
 .price-row {
   display: flex;
@@ -266,11 +324,12 @@ defineExpose({ fly })
 }
 .now {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 700;
   color: var(--text);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.5px;
+  letter-spacing: -1.4px;
+  line-height: 1;
 }
 .was {
   font-size: 15px;
@@ -281,24 +340,26 @@ defineExpose({ fly })
 }
 .save {
   margin-left: auto;
-  background: var(--save-bg);
-  color: var(--save-text);
+  background: var(--like);
+  color: #06140C;
   font-weight: 800;
-  font-size: 13px;
-  padding: 4px 11px;
-  border-radius: 999px;
+  font-size: 12.5px;
+  letter-spacing: .2px;
+  padding: 5px 11px;
+  border-radius: 8px;
   font-variant-numeric: tabular-nums;
+  box-shadow: 0 4px 12px -2px rgba(18,184,119,.5);
 }
 
 /* ---- 移动端字体优化：略微收紧，避免窄屏拥挤 ---- */
 @media (max-width: 600px) {
-  .card-body { padding: 12px 16px 18px; }
+  .card-body { padding: 14px 16px 18px; }
   .name { font-size: 16px; }
-  .size { font-size: 12.5px; }
-  .now { font-size: 24px; }
+  .size { font-size: 12px; }
+  .now { font-size: 31px; letter-spacing: -1.2px; }
   .was { font-size: 14px; }
-  .save { font-size: 12.5px; }
-  .store-badge { font-size: 12px; padding: 4px 10px; }
+  .save { font-size: 12px; }
+  .store-badge { font-size: 10.5px; padding: 4px 10px; }
   .discount-badge { font-size: 15px; padding: 5px 11px; }
   .emoji { font-size: 96px; }
 }

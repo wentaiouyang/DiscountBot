@@ -109,8 +109,14 @@ defineExpose({ reset })
   gap: 22px;
   animation: deck-in .5s .08s cubic-bezier(.18,.89,.32,1.28) both;
 }
-.actions :deep(.v-btn) { transition: transform .12s ease; }
+.actions :deep(.v-btn) { transition: transform .16s cubic-bezier(.18,.89,.32,1.28), box-shadow .2s ease; }
 .actions :deep(.v-btn:active) { transform: scale(.88); }
+/* 方向性手感：悬停时朝各自语义方向轻抬 */
+.btn-nope:hover { transform: translateX(-3px) translateY(-2px); }
+.btn-like:hover { transform: translateX(3px) translateY(-2px); }
+@media (prefers-reduced-motion: reduce) {
+  .btn-nope:hover, .btn-like:hover { transform: none; }
+}
 /* 加入按钮轻微呼吸，引导用户点击 */
 .btn-like { animation: like-pulse 2.4s ease-in-out infinite; }
 @keyframes like-pulse {
@@ -129,10 +135,12 @@ defineExpose({ reset })
 .btn-like {
   background: var(--grad-like) !important;
   color: #fff !important;
+  box-shadow: 0 10px 24px -6px rgba(18,184,119,.5), inset 0 1.5px 0 rgba(255,255,255,.4) !important;
 }
 .btn-nope {
   background: var(--grad-nope) !important;
   color: #fff !important;
+  box-shadow: 0 10px 24px -6px rgba(255,61,94,.45), inset 0 1.5px 0 rgba(255,255,255,.4) !important;
 }
 .empty {
   position: absolute;

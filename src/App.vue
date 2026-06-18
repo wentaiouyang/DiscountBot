@@ -10,8 +10,8 @@ const { mobile } = useDisplay()
 /* ---- 主题（浅色 / 深色）---- */
 const vTheme = useTheme()
 const stored = localStorage.getItem('ss-theme')
-const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches
-const isDark = ref(stored ? stored === 'dark' : !!prefersDark)
+// 默认深色（炭黑高对比为主视觉）；用户手动切换后记忆其选择
+const isDark = ref(stored ? stored === 'dark' : true)
 
 function applyTheme(dark) {
   const name = dark ? 'dark' : 'light'
@@ -20,7 +20,7 @@ function applyTheme(dark) {
   document.documentElement.dataset.theme = name
   document
     .querySelectorAll('meta[name="theme-color"]')
-    .forEach((m) => m.setAttribute('content', dark ? '#0E0D17' : '#FBF2EC'))
+    .forEach((m) => m.setAttribute('content', dark ? '#0A0A0D' : '#ECEEF2'))
 }
 watch(isDark, (v) => {
   applyTheme(v)
@@ -212,22 +212,17 @@ applyAccent(filter.value)
 
 .brand { display: flex; align-items: center; gap: 10px; padding-left: 16px; }
 .logo {
-  width: 36px; height: 36px;
+  width: 34px; height: 34px;
   display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--accent-grad);
-  box-shadow: var(--shadow-pop);
-  animation: cart-bob 2.8s ease-in-out infinite;
-}
-@keyframes cart-bob {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  50%      { transform: translateY(-2.5px) rotate(-5deg); }
+  box-shadow: var(--shadow-pop), inset 0 1px 0 rgba(255,255,255,.35);
 }
 .brand-name {
   font-family: var(--font-display);
-  font-size: 21px;
-  font-weight: 500;
-  letter-spacing: -0.2px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.6px;
   color: var(--text);
 }
 .brand-name b {
@@ -240,19 +235,21 @@ applyAccent(filter.value)
 
 .filter-pills { display: flex; gap: 6px; }
 .filter-pills button {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   border: 1.5px solid var(--border-strong);
-  background: var(--surface);
-  border-radius: 999px;
-  padding: 6px 15px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 6px 14px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: -0.2px;
   color: var(--text-muted);
   cursor: pointer;
   transition: transform .15s ease, background .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
-.filter-pills button:hover { border-color: var(--text-faint); }
+.filter-pills button:hover { border-color: var(--text-faint); transform: translateY(-1px); }
 .filter-pills button:active { transform: scale(.92); }
+.filter-pills button.on:hover { transform: translateY(-1px); }
 .filter-pills button.on {
   background: var(--accent-grad);
   color: #fff;
@@ -268,9 +265,9 @@ applyAccent(filter.value)
   width: 38px; height: 38px;
   flex-shrink: 0;
   display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1.5px solid var(--border-strong);
-  background: var(--surface);
+  background: var(--surface-2);
   color: var(--text-muted);
   cursor: pointer;
   transition: transform .15s ease, color .2s ease, border-color .2s ease;
@@ -311,9 +308,9 @@ applyAccent(filter.value)
   font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
-  background: var(--surface);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 4px 12px;
   margin: 0 0 16px;
   letter-spacing: .2px;

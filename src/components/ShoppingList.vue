@@ -105,7 +105,7 @@ const savedPct = computed(() =>
   align-items: center;
   justify-content: center;
   padding: 0 6px;
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-pop), inset 0 1px 0 rgba(255,255,255,.4);
 }
 .list-body {
   flex: 1;
@@ -140,6 +140,8 @@ const savedPct = computed(() =>
   background: var(--surface-sunken);
   overflow: hidden;
 }
+.row-emoji.Coles { background: rgba(229, 35, 27, 0.10); }
+.row-emoji.Woolworths { background: rgba(23, 136, 65, 0.10); }
 .row-emoji img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
 .row-info { flex: 1; min-width: 0; }
 .row-name {
