@@ -11,13 +11,25 @@ const vuetify = createVuetify({
     defaultTheme: 'light',
     themes: {
       light: {
+        dark: false,
         colors: {
-          primary: '#E5231B',   // Coles 红
+          primary: '#F2740C',   // 暖橙（默认强调色）
           secondary: '#178841', // Woolies 绿
-          like: '#2ecc71',
-          nope: '#ff4d6d',
-          surface: '#ffffff',
-          background: '#f3f1ec',
+          like: '#12B877',
+          nope: '#FF3D5E',
+          surface: '#FFFFFF',
+          background: '#FBF2EC',
+        },
+      },
+      dark: {
+        dark: true,
+        colors: {
+          primary: '#FF9D44',
+          secondary: '#3FB36B',
+          like: '#2BE08A',
+          nope: '#FF6B82',
+          surface: '#1A1726',
+          background: '#0E0D17',
         },
       },
     },

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -7,21 +7,129 @@
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#E5231B" />
+    <meta name="theme-color" content="#FBF2EC" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0E0D17" media="(prefers-color-scheme: dark)" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="SwipeSpecials" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
+    <!-- Fonts: Fredoka (display) + Nunito (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
       :root {
-        /* 暴露安全区域内边距，供 JS / CSS 读取（PWA 全面屏适配） */
+        /* 安全区域内边距（PWA 全面屏适配） */
         --safe-top: env(safe-area-inset-top, 0px);
         --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+        /* ---- 字体 ---- */
+        --font-display: 'Fredoka', system-ui, -apple-system, sans-serif;
+        --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+
+        /* ---- 主题强调色（默认 = 全部·暖橙；随门店切换为 Coles 红 / Woolies 绿，由 JS 设置）---- */
+        --accent: #F2740C;
+        --accent-grad: linear-gradient(135deg, #FF9D44 0%, #F2740C 100%);
+        --accent-contrast: #ffffff;
+        --accent-glow: 0 8px 22px rgba(242, 116, 12, 0.34);
+        --accent-soft: rgba(242, 116, 12, 0.18);
+
+        --grad-like: linear-gradient(135deg, #2BE08A 0%, #11B877 100%);
+        --grad-nope: linear-gradient(135deg, #FF7A8A 0%, #FF3D5E 100%);
+
+        /* ---- 固定门店 / 语义色 ---- */
+        --coles: #E5231B;
+        --woolies: #178841;
+        --like: #12B877;
+        --nope: #FF3D5E;
       }
-      /* overflow-x: clip 防止横向溢出滚动，且不影响 sticky（区别于 hidden） */
-      html, body { margin: 0; background: #f3f1ec; overscroll-behavior: none; overflow-x: clip; }
+
+      /* ===== 浅色主题 ===== */
+      :root,
+      [data-theme='light'] {
+        color-scheme: light;
+        --bg-solid: #FBF2EC;
+        --blob-neutral: rgba(120, 96, 64, 0.07);
+
+        --surface: #FFFFFF;
+        --surface-2: #FFF7F2;
+        --surface-sunken: #F6EFE9;
+        --border: rgba(28, 20, 40, 0.08);
+        --border-strong: rgba(28, 20, 40, 0.14);
+
+        --text: #1C1428;
+        --text-muted: #7C7488;
+        --text-faint: #ADA5B8;
+
+        --save-bg: #FFEDC9;
+        --save-text: #B26A00;
+        --discount-bg: #15101F;
+        --discount-text: #FFD84D;
+
+        --shadow-card: 0 22px 48px -16px rgba(28, 20, 40, 0.22), 0 10px 24px rgba(28, 20, 40, 0.10);
+        --shadow-soft: 0 10px 30px rgba(28, 20, 40, 0.10);
+        --shadow-pop: var(--accent-glow);
+      }
+
+      /* ===== 深色主题 ===== */
+      [data-theme='dark'] {
+        color-scheme: dark;
+        --bg-solid: #0E0D17;
+        --blob-neutral: rgba(255, 255, 255, 0.05);
+
+        --surface: #1A1726;
+        --surface-2: #221E32;
+        --surface-sunken: #14111F;
+        --border: rgba(255, 255, 255, 0.09);
+        --border-strong: rgba(255, 255, 255, 0.16);
+
+        --text: #F4F1FB;
+        --text-muted: #A49DBA;
+        --text-faint: #6E6884;
+
+        --save-bg: rgba(255, 184, 0, 0.16);
+        --save-text: #FFCB57;
+        --discount-bg: #FFD84D;
+        --discount-text: #15101F;
+
+        --shadow-card: 0 24px 54px -16px rgba(0, 0, 0, 0.66), 0 0 0 1px rgba(255, 255, 255, 0.04);
+        --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.5);
+        --shadow-pop: var(--accent-glow);
+      }
+
+      html, body {
+        margin: 0;
+        font-family: var(--font-body);
+        background: var(--bg-solid);
+        color: var(--text);
+        overscroll-behavior: none;
+        overflow-x: clip;
+        transition: background-color 0.4s ease, color 0.4s ease;
+      }
+
+      /* 活力渐变光斑背景（固定层，置于内容之下） */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: -10% -10% -10% -10%;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(40vmax 40vmax at 10% -8%, var(--accent-soft), transparent 60%),
+          radial-gradient(34vmax 34vmax at 104% 16%, var(--blob-neutral), transparent 58%),
+          radial-gradient(44vmax 44vmax at 52% 118%, var(--accent-soft), transparent 62%);
+        transition: background 0.5s ease;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html, body, body::before { transition: none; }
+      }
     </style>
   </head>
   <body>

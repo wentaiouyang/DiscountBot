@@ -71,36 +71,41 @@ const savedPct = computed(() =>
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow-soft);
   overflow: hidden;
 }
 .list-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--border);
 }
 .title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 800;
-  font-size: 17px;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text);
 }
 .count {
-  background: #E5231B;
+  background: var(--accent-grad);
   color: #fff;
   border-radius: 999px;
   font-size: 12px;
+  font-weight: 800;
   min-width: 22px;
   height: 22px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0 6px;
+  box-shadow: var(--shadow-pop);
 }
 .list-body {
   flex: 1;
@@ -108,67 +113,79 @@ const savedPct = computed(() =>
   padding: 6px 8px;
 }
 .list-empty {
-  color: #aaa;
+  color: var(--text-muted);
   text-align: center;
-  padding: 40px 12px;
+  padding: 44px 12px;
   font-size: 14px;
+  font-weight: 600;
 }
 .row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px;
-  border-radius: 12px;
+  gap: 11px;
+  padding: 9px 8px;
+  border-radius: 14px;
+  transition: background .15s ease;
 }
-.row:hover { background: #faf8f4; }
+.row:hover { background: var(--surface-2); }
 .row-emoji {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
   flex-shrink: 0;
-  background: #f3f1ec;
+  background: var(--surface-sunken);
   overflow: hidden;
 }
-.row-emoji img { width: 100%; height: 100%; object-fit: contain; }
+.row-emoji img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
 .row-info { flex: 1; min-width: 0; }
 .row-name {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.row-meta { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
-.r-now { color: #E5231B; font-weight: 700; font-size: 14px; }
-.r-was { color: #bbb; text-decoration: line-through; font-size: 12px; }
+.row-meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+.r-now { color: var(--text); font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; }
+.r-was { color: var(--text-faint); text-decoration: line-through; font-size: 12px; font-variant-numeric: tabular-nums; }
 .r-store {
   margin-left: auto;
   font-size: 10px;
-  font-weight: 700;
-  padding: 1px 7px;
+  font-weight: 800;
+  padding: 2px 8px;
   border-radius: 999px;
   color: #fff;
+  letter-spacing: .3px;
 }
-.r-store.Coles { background: #E5231B; }
-.r-store.Woolworths { background: #178841; }
+.r-store.Coles { background: var(--coles); }
+.r-store.Woolworths { background: var(--woolies); }
 .totals {
-  border-top: 1px solid #f0f0f0;
-  padding: 14px 16px;
-  background: #fffdf8;
+  border-top: 1px solid var(--border);
+  padding: 15px 16px;
+  background: var(--surface-2);
 }
 .t-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-weight: 700;
+  font-weight: 800;
+  color: var(--text);
 }
-.t-total { font-size: 24px; color: #111; }
-.t-row.sub { font-weight: 500; font-size: 13px; color: #999; margin-top: 4px; }
-.t-saved { color: #178841; font-weight: 800; }
+.t-total {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.t-row.sub { font-weight: 600; font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+.t-row.sub s { color: var(--text-faint); }
+.t-saved { color: var(--like); font-weight: 800; font-variant-numeric: tabular-nums; }
 
 .list-enter-active, .list-leave-active { transition: all .3s ease; }
 .list-enter-from { opacity: 0; transform: translateX(20px); }

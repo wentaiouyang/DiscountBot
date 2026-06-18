@@ -67,3 +67,4 @@ amplifytools.xcconfig
 
 # Superpowers
 .superpowers/
+.gstack/

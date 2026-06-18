@@ -27,20 +27,30 @@ const storeColor = computed(() =>
   props.product.store === 'Coles' ? '#E5231B' : '#178841'
 )
 
-// 拖动时卡片的变换（含旋转）
+// 拖动时卡片的变换（含旋转）。z-index 让「当前可操作卡片」始终位于卡堆最上层，
+// 否则后渲染的背景预览卡会覆盖在上面、拦截指针事件，导致无法拖动。
 const cardStyle = computed(() => {
-  if (leaving.value) return {} // 离场动画由 class 控制
   const rot = dx.value / 18
-  const base = props.active ? 0 : props.depth
+  // 离场：保持顶层并带方向地飞出屏幕
+  if (leaving.value) {
+    return {
+      transform: `translate(${dx.value}px, ${dy.value}px) rotate(${rot}deg)`,
+      transition: 'transform .32s ease-out, opacity .32s ease-out',
+      zIndex: 40,
+    }
+  }
   if (!props.active) {
+    const base = props.depth
     return {
       transform: `translateY(${base * 10}px) scale(${1 - base * 0.04})`,
       transition: 'transform .25s ease',
+      zIndex: 20 - base,
     }
   }
   return {
     transform: `translate(${dx.value}px, ${dy.value}px) rotate(${rot}deg)`,
     transition: dragging.value ? 'none' : 'transform .35s cubic-bezier(.18,.89,.32,1.28)',
+    zIndex: 30,
   }
 })
 
@@ -114,7 +124,7 @@ defineExpose({ fly })
       <div class="discount-badge">-{{ product.percentOff }}%</div>
 
       <!-- 滑动提示 -->
-      <div class="stamp like" :style="{ opacity: likeOpacity }">加入 ❤</div>
+      <div class="stamp like" :style="{ opacity: likeOpacity }">加入 ♥</div>
       <div class="stamp nope" :style="{ opacity: nopeOpacity }">跳过 ✕</div>
     </div>
 
@@ -138,9 +148,10 @@ defineExpose({ fly })
   margin: auto;
   width: 100%;
   height: 100%;
-  background: #fff;
-  border-radius: 22px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  box-shadow: var(--shadow-card);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -176,63 +187,76 @@ defineExpose({ fly })
   top: 14px;
   left: 14px;
   color: #fff;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 5px 12px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 5px 13px;
   border-radius: 999px;
-  letter-spacing: .5px;
+  letter-spacing: .4px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.22);
+  backdrop-filter: blur(2px);
 }
 .discount-badge {
   position: absolute;
   top: 14px;
   right: 14px;
-  background: #111;
-  color: #ffd84d;
-  font-weight: 800;
+  background: var(--accent-grad);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: 16px;
-  padding: 6px 12px;
-  border-radius: 12px;
+  padding: 6px 13px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-pop);
+  font-variant-numeric: tabular-nums;
 }
 .stamp {
   position: absolute;
-  top: 26px;
-  font-size: 26px;
-  font-weight: 900;
-  padding: 6px 16px;
-  border-radius: 12px;
+  top: 28px;
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 14px;
   border: 4px solid;
   transform: rotate(-15deg);
   pointer-events: none;
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(2px);
 }
 .stamp.like {
   right: 18px;
-  color: var(--like, #2ecc71);
-  border-color: var(--like, #2ecc71);
+  color: var(--like);
+  border-color: var(--like);
 }
 .stamp.nope {
   left: 18px;
-  color: var(--nope, #ff4d6d);
-  border-color: var(--nope, #ff4d6d);
+  color: var(--nope);
+  border-color: var(--nope);
   transform: rotate(15deg);
 }
 .card-body {
-  padding: 14px 18px 20px;
-  background: #fff;
+  padding: 16px 18px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
 }
 .name {
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: #1c1c1c;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.2px;
+  color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .size {
-  color: #888;
+  color: var(--text-muted);
   font-size: 13px;
-  margin: 2px 0 8px;
+  font-weight: 600;
+  margin: 3px 0 10px;
 }
 .price-row {
   display: flex;
@@ -241,23 +265,29 @@ defineExpose({ fly })
   flex-wrap: wrap;
 }
 .now {
-  font-size: 26px;
-  font-weight: 800;
-  color: #E5231B;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
 }
 .was {
   font-size: 15px;
-  color: #aaa;
+  color: var(--text-faint);
   text-decoration: line-through;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .save {
   margin-left: auto;
-  background: #fff0d6;
-  color: #b26a00;
-  font-weight: 700;
+  background: var(--save-bg);
+  color: var(--save-text);
+  font-weight: 800;
   font-size: 13px;
-  padding: 3px 10px;
+  padding: 4px 11px;
   border-radius: 999px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- 移动端字体优化：略微收紧，避免窄屏拥挤 ---- */
