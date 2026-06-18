@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "scrape": "node scripts/scrape-specials.mjs"
+    "scrape": "node scripts/scrape-specials.mjs",
+    "test": "node --test scripts/*.test.mjs"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",

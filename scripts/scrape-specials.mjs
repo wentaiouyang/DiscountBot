@@ -12,6 +12,7 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { argv } from 'node:process'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = resolve(__dirname, '../public/products.json')
@@ -57,6 +58,45 @@ function cookieHeaderFrom(res) {
 
 const round2 = (n) => Math.round(n * 100) / 100
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+// 单次请求超时 / 最大重试次数（应对 Akamai 反爬偶发性丢弃/重置连接）
+const FETCH_TIMEOUT_MS = 15000
+const MAX_RETRIES = 3
+
+// 带超时与重试的 fetch。
+// Woolworths/Coles 前置 Akamai 会偶发性重置或挂起连接，表现为 undici 的
+// "fetch failed"（TypeError，真实原因藏在 err.cause）或请求永久挂起。
+// 这里用 AbortSignal.timeout 防止挂起，并对网络错误 / 5xx / 429 做退避重试。
+export async function fetchWithRetry(
+  url,
+  init = {},
+  { retries = MAX_RETRIES, timeout = FETCH_TIMEOUT_MS, label = url } = {},
+) {
+  let lastErr
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeout) })
+      if (res.status >= 500 || res.status === 429) {
+        lastErr = new Error(`HTTP ${res.status}`)
+      } else {
+        return res
+      }
+    } catch (err) {
+      lastErr = err
+      // undici 把真实原因放在 err.cause（如 ECONNRESET / UND_ERR_SOCKET）
+      const cause = err.cause?.code || err.cause?.message || ''
+      if (attempt < retries) {
+        console.warn(
+          `  [retry ${attempt}/${retries}] ${label}: ${err.message}${cause ? ` (${cause})` : ''}`,
+        )
+      }
+    }
+    if (attempt < retries) await sleep(attempt * 800) // 线性退避：0.8s、1.6s…
+  }
+  throw lastErr
+}
+
 // ---------------------------------------------------------------- Woolworths
 const WOOLIES_TERMS = [
   'chocolate', 'coffee', 'chips', 'shampoo', 'cheese', 'soft drink',
@@ -65,15 +105,17 @@ const WOOLIES_TERMS = [
 ]
 
 async function scrapeWoolies() {
-  const home = await fetch('https://www.woolworths.com.au/', {
-    headers: { 'User-Agent': UA, Accept: 'text/html' },
-  })
+  const home = await fetchWithRetry(
+    'https://www.woolworths.com.au/',
+    { headers: { 'User-Agent': UA, Accept: 'text/html' } },
+    { label: 'woolies home' },
+  )
   const cookie = cookieHeaderFrom(home)
 
   const byCode = new Map()
   for (const term of WOOLIES_TERMS) {
     try {
-      const res = await fetch('https://www.woolworths.com.au/apis/ui/Search/products', {
+      const res = await fetchWithRetry('https://www.woolworths.com.au/apis/ui/Search/products', {
         method: 'POST',
         headers: {
           'User-Agent': UA,
@@ -95,7 +137,7 @@ async function scrapeWoolies() {
           IsBundle: false,
           IsMobile: false,
         }),
-      })
+      }, { label: `woolies "${term}"` })
       if (!res.ok) {
         console.warn(`  [woolies] "${term}" HTTP ${res.status}`)
         continue
@@ -118,18 +160,21 @@ async function scrapeWoolies() {
         }
       }
     } catch (err) {
-      console.warn(`  [woolies] "${term}" 失败:`, err.message)
+      const cause = err.cause?.code || err.cause?.message || ''
+      console.warn(`  [woolies] "${term}" 失败:`, err.message, cause ? `(${cause})` : '')
     }
-    await new Promise((r) => setTimeout(r, 350)) // 轻微限频
+    await sleep(350) // 轻微限频
   }
   return [...byCode.values()]
 }
 
 // ---------------------------------------------------------------------- Coles
 async function scrapeColes() {
-  const home = await fetch('https://www.coles.com.au/', {
-    headers: { 'User-Agent': UA, Accept: 'text/html' },
-  })
+  const home = await fetchWithRetry(
+    'https://www.coles.com.au/',
+    { headers: { 'User-Agent': UA, Accept: 'text/html' } },
+    { label: 'coles home' },
+  )
   const cookie = cookieHeaderFrom(home)
   const html = await home.text()
   const buildId = html.match(/"buildId":"([^"]+)"/)?.[1]
@@ -144,14 +189,14 @@ async function scrapeColes() {
       const url =
         `https://www.coles.com.au/_next/data/${buildId}/en/on-special.json` +
         (page > 1 ? `?page=${page}` : '')
-      const res = await fetch(url, {
+      const res = await fetchWithRetry(url, {
         headers: {
           'User-Agent': UA,
           Accept: 'application/json',
           Referer: 'https://www.coles.com.au/on-special',
           Cookie: cookie,
         },
-      })
+      }, { label: `coles page ${page}` })
       if (!res.ok) {
         console.warn(`  [coles] page ${page} HTTP ${res.status}`)
         continue
@@ -177,9 +222,10 @@ async function scrapeColes() {
       }
       if (results.length === 0) break
     } catch (err) {
-      console.warn(`  [coles] page ${page} 失败:`, err.message)
+      const cause = err.cause?.code || err.cause?.message || ''
+      console.warn(`  [coles] page ${page} 失败:`, err.message, cause ? `(${cause})` : '')
     }
-    await new Promise((r) => setTimeout(r, 350))
+    await sleep(350)
   }
   return [...byId.values()]
 }
@@ -223,4 +269,7 @@ async function main() {
   console.log(`已写入 ${OUT}（共 ${products.length} 件，更新于 ${payload.updatedAt}）`)
 }
 
-main()
+// 仅在被直接运行时执行（被测试 import 时不触发网络请求）
+if (argv[1] && resolve(argv[1]) === fileURLToPath(import.meta.url)) {
+  main()
+}

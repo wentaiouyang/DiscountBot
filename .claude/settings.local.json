@@ -3,7 +3,8 @@
     "allow": [
       "Read(//Users/abiinteriors/.agents/skills/ui-ux-pro-max/**)",
       "Bash(python3 scripts/search.py \"Fredoka Nunito playful\" --domain google-fonts -n 4)",
-      "Bash(python3 scripts/search.py \"vibrant block-based\" --domain prompt -n 2)"
+      "Bash(python3 scripts/search.py \"vibrant block-based\" --domain prompt -n 2)",
+      "Skill(investigate)"
     ]
   }
 }
