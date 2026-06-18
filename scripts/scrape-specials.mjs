@@ -12,7 +12,8 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { argv } from 'node:process'
+import { argv, env } from 'node:process'
+import { ProxyAgent, setGlobalDispatcher } from 'undici'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = resolve(__dirname, '../public/products.json')
@@ -63,6 +64,24 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 // 单次请求超时 / 最大重试次数（应对 Akamai 反爬偶发性丢弃/重置连接）
 const FETCH_TIMEOUT_MS = 15000
 const MAX_RETRIES = 3
+
+// 住宅代理（可选）。
+// Woolworths/Coles 的 Akamai 会按 IP 信誉打分：本地住宅 IP 能通过，
+// 而 GitHub Actions 的云端/数据中心 IP 几乎必被拦截 —— 这也是 CI 始终拿不到
+// 数据的根因。设置 SCRAPE_PROXY=http://user:pass@host:port 即可让请求经由
+// 住宅代理（如 ScraperAPI 代理模式）发出，绕过 IP 拦截。未设置时按直连处理，
+// 本地开发行为不变。
+const PROXY_URL = (env.SCRAPE_PROXY || '').trim()
+if (PROXY_URL) {
+  // setGlobalDispatcher 会作用于全局 fetch（Node 内置 fetch 与 undici 共享全局
+  // dispatcher）。注意：不能把 ProxyAgent 作为 fetch 的 per-request dispatcher
+  // 传入 —— 内置 fetch 会拒绝外部 undici 的实例（UND_ERR_INVALID_ARG）。
+  setGlobalDispatcher(new ProxyAgent(PROXY_URL))
+  // 不打印凭据，仅打印主机，便于在 CI 日志确认代理已生效
+  let host = PROXY_URL
+  try { host = new URL(PROXY_URL).host } catch { /* 保留原值 */ }
+  console.log(`使用住宅代理：${host}`)
+}
 
 // 带超时与重试的 fetch。
 // Woolworths/Coles 前置 Akamai 会偶发性重置或挂起连接，表现为 undici 的

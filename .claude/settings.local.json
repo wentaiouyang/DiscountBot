@@ -4,7 +4,11 @@
       "Read(//Users/abiinteriors/.agents/skills/ui-ux-pro-max/**)",
       "Bash(python3 scripts/search.py \"Fredoka Nunito playful\" --domain google-fonts -n 4)",
       "Bash(python3 scripts/search.py \"vibrant block-based\" --domain prompt -n 2)",
-      "Skill(investigate)"
+      "Skill(investigate)",
+      "Bash(gh run *)",
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(gh --version)",
+      "Bash(node -e 'const d=require\\(\"./public/products.json\"\\); console.log\\(\"updatedAt:\",d.updatedAt,\"| count:\",d.count,\"| sources:\",JSON.stringify\\(d.sources\\)\\)')"
     ]
   }
 }

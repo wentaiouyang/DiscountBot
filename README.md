@@ -45,6 +45,29 @@ npm run scrape    # 重新生成 public/products.json
 每周自动更新由 GitHub Action [`update-specials.yml`](.github/workflows/update-specials.yml) 负责
 （每周三早上定时运行脚本并提交 `products.json`，也可在 Actions 页面手动触发）。
 
+### ⚠️ CI 必须配置住宅代理（`SCRAPE_PROXY`）
+
+Woolworths / Coles 前置 **Akamai 反爬会按 IP 信誉打分**：本地住宅 IP 能通过，
+但 **GitHub Actions 的云端/数据中心 IP 几乎必被拦截**（请求被重置或返回验证页），
+这会导致 CI 始终抓不到数据。重试、改 UA、换无头浏览器都救不了 —— 出口 IP 才是关键。
+
+解决办法：让 CI 经 **住宅代理** 出站。脚本读取环境变量 `SCRAPE_PROXY`，
+设置后所有请求都经该代理发出；未设置时按直连处理（本地开发不变）。
+
+1. 注册一个住宅代理服务并取得 **代理模式** 地址，例如 ScraperAPI（免费档约 1000 次/月，
+   本项目每周约 90 次，绰绰有余）。格式形如 `http://user:pass@proxy-host:port`。
+2. 在仓库 **Settings → Secrets and variables → Actions** 新建 secret：
+   - Name：`SCRAPE_PROXY`
+   - Value：上面的代理地址
+3. 到 **Actions** 页面手动触发 `Update specials data` 验证；日志应出现 `使用住宅代理：<host>`
+   且能抓到商品。
+
+本地也可临时用代理跑一次验证：
+
+```bash
+SCRAPE_PROXY="http://user:pass@proxy-host:port" npm run scrape
+```
+
 **容错设计**：
 
 - 两个门店相互独立，任一抓取失败不影响另一个；两边都失败时保留旧数据不覆盖。

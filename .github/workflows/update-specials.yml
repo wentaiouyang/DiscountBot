@@ -23,8 +23,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Scrape specials
+        # Akamai 拦截 GitHub Actions 的数据中心 IP，必须经住宅代理发出请求。
+        # 在仓库 Settings → Secrets and variables → Actions 添加 SCRAPE_PROXY，
+        # 值形如 http://user:pass@proxy-host:port（如 ScraperAPI 代理模式）。
+        env:
+          SCRAPE_PROXY: ${{ secrets.SCRAPE_PROXY }}
         run: node scripts/scrape-specials.mjs
 
       - name: Commit updated products.json

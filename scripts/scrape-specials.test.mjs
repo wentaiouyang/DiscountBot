@@ -63,6 +63,43 @@ test('持续失败时抛出原始错误（带 cause）', async () => {
   } finally { restoreFetch() }
 })
 
+test('setGlobalDispatcher(ProxyAgent) 会让全局 fetch 真正经代理出站', async () => {
+  // 这是 CI 修复的核心机制：起一个本地 HTTP 转发代理，确认 setGlobalDispatcher
+  // 之后全局 fetch 的请求确实流经该代理，而非直连。
+  const { createServer } = await import('node:http')
+  const { connect } = await import('node:net')
+  const { setGlobalDispatcher, getGlobalDispatcher, ProxyAgent } = await import('undici')
+
+  let sawConnect = false
+  const proxy = createServer()
+  // 处理 HTTPS 的 CONNECT 隧道
+  proxy.on('connect', (req, clientSocket, head) => {
+    sawConnect = true
+    const [host, port] = req.url.split(':')
+    const upstream = connect(Number(port), host, () => {
+      clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n')
+      upstream.write(head)
+      upstream.pipe(clientSocket)
+      clientSocket.pipe(upstream)
+    })
+    upstream.on('error', () => clientSocket.end())
+    clientSocket.on('error', () => upstream.end())
+  })
+  await new Promise((r) => proxy.listen(0, '127.0.0.1', r))
+  const { port } = proxy.address()
+
+  const prev = getGlobalDispatcher()
+  try {
+    setGlobalDispatcher(new ProxyAgent(`http://127.0.0.1:${port}`))
+    const res = await fetch('https://example.com/', { signal: AbortSignal.timeout(10000) })
+    assert.equal(res.status, 200)
+    assert.ok(sawConnect, '代理应收到 CONNECT 隧道请求（证明流量经过代理）')
+  } finally {
+    setGlobalDispatcher(prev)
+    proxy.close()
+  }
+})
+
 test('请求挂起时被超时中止（不会无限等待）', async () => {
   // fetch 模拟慢响应（5s 才返回）；100ms 超时应在它返回前中止
   stubFetch((url, init) =>
