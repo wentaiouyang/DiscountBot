@@ -13,7 +13,6 @@ import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { argv, env } from 'node:process'
-import { ProxyAgent, setGlobalDispatcher } from 'undici'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = resolve(__dirname, '../public/products.json')
@@ -72,15 +71,25 @@ const MAX_RETRIES = 3
 // 住宅代理（如 ScraperAPI 代理模式）发出，绕过 IP 拦截。未设置时按直连处理，
 // 本地开发行为不变。
 const PROXY_URL = (env.SCRAPE_PROXY || '').trim()
-if (PROXY_URL) {
-  // setGlobalDispatcher 会作用于全局 fetch（Node 内置 fetch 与 undici 共享全局
-  // dispatcher）。注意：不能把 ProxyAgent 作为 fetch 的 per-request dispatcher
-  // 传入 —— 内置 fetch 会拒绝外部 undici 的实例（UND_ERR_INVALID_ARG）。
-  setGlobalDispatcher(new ProxyAgent(PROXY_URL))
-  // 不打印凭据，仅打印主机，便于在 CI 日志确认代理已生效
-  let host = PROXY_URL
-  try { host = new URL(PROXY_URL).host } catch { /* 保留原值 */ }
-  console.log(`使用住宅代理：${host}`)
+
+// 按需启用住宅代理。undici 仅在配置了代理时才动态加载：
+//  - 没配代理（本地开发）时根本不 import undici，避免它在某些 Node 版本上的
+//    加载期崩溃（如 Node 20 + undici 8 的 markAsUncloneable）拖垮整个脚本；
+//  - setGlobalDispatcher 会作用于全局 fetch（内置 fetch 与 undici 共享全局
+//    dispatcher）。不能把 ProxyAgent 当作 per-request dispatcher 传给内置 fetch
+//    （会报 UND_ERR_INVALID_ARG），必须走全局 dispatcher。
+async function setupProxy() {
+  if (!PROXY_URL) return
+  try {
+    const { ProxyAgent, setGlobalDispatcher } = await import('undici')
+    setGlobalDispatcher(new ProxyAgent(PROXY_URL))
+    // 不打印凭据，仅打印主机，便于在 CI 日志确认代理已生效
+    let host = PROXY_URL
+    try { host = new URL(PROXY_URL).host } catch { /* 保留原值 */ }
+    console.log(`使用住宅代理：${host}`)
+  } catch (err) {
+    console.error(`代理初始化失败（${err.message}）；将以直连方式继续。`)
+  }
 }
 
 // 带超时与重试的 fetch。
@@ -259,6 +268,7 @@ function topByDiscount(items) {
 }
 
 async function main() {
+  await setupProxy()
   console.log('抓取 Woolworths…')
   let woolies = []
   try { woolies = await scrapeWoolies() } catch (e) { console.warn('Woolworths 整体失败:', e.message) }
