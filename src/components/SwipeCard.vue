@@ -259,4 +259,17 @@ defineExpose({ fly })
   padding: 3px 10px;
   border-radius: 999px;
 }
+
+/* ---- 移动端字体优化：略微收紧，避免窄屏拥挤 ---- */
+@media (max-width: 600px) {
+  .card-body { padding: 12px 16px 18px; }
+  .name { font-size: 16px; }
+  .size { font-size: 12.5px; }
+  .now { font-size: 24px; }
+  .was { font-size: 14px; }
+  .save { font-size: 12.5px; }
+  .store-badge { font-size: 12px; padding: 4px 10px; }
+  .discount-badge { font-size: 15px; padding: 5px 11px; }
+  .emoji { font-size: 96px; }
+}
 </style>

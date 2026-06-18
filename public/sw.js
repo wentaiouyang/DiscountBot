@@ -1,5 +1,5 @@
 // Swipe Specials Service Worker —— 应用壳缓存 + 离线兜底
-const CACHE = 'swipe-specials-v1'
+const CACHE = 'swipe-specials-v2'
 const APP_SHELL = [
   './',
   './index.html',
@@ -30,6 +30,18 @@ self.addEventListener('fetch', (e) => {
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req).catch(() => caches.match('./index.html'))
+    )
+    return
+  }
+
+  // 实时特价数据：网络优先（每周刷新），成功后回填缓存，离线时回退到上次缓存
+  if (new URL(req.url).pathname.endsWith('/products.json')) {
+    e.respondWith(
+      fetch(req).then((res) => {
+        const copy = res.clone()
+        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {})
+        return res
+      }).catch(() => caches.match(req))
     )
     return
   }

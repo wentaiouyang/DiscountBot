@@ -88,11 +88,25 @@ defineExpose({ reset })
   width: 100%;
   max-width: 360px;
   aspect-ratio: 3 / 4.4;
+  animation: deck-in .45s cubic-bezier(.18,.89,.32,1.28) both;
+}
+@keyframes deck-in {
+  from { opacity: 0; transform: translateY(14px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .actions {
   display: flex;
   align-items: center;
   gap: 22px;
+  animation: deck-in .5s .08s cubic-bezier(.18,.89,.32,1.28) both;
+}
+.actions :deep(.v-btn) { transition: transform .12s ease; }
+.actions :deep(.v-btn:active) { transform: scale(.88); }
+/* 加入按钮轻微呼吸，引导用户点击 */
+.btn-like { animation: like-pulse 2.4s ease-in-out infinite; }
+@keyframes like-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, .0); }
+  50%      { box-shadow: 0 0 0 8px rgba(46, 204, 113, .12); }
 }
 .counter {
   font-size: 13px;
@@ -121,7 +135,19 @@ defineExpose({ reset })
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
   padding: 24px;
 }
-.empty-emoji { font-size: 64px; }
+.empty { animation: deck-in .45s cubic-bezier(.18,.89,.32,1.28) both; }
+.empty-emoji { font-size: 64px; animation: pop-bounce .6s cubic-bezier(.18,.89,.32,1.28) both; }
 .empty-title { font-size: 22px; font-weight: 800; margin-top: 8px; }
 .empty-sub { color: #888; margin-top: 6px; }
+@keyframes pop-bounce {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 600px) {
+  .counter { font-size: 14px; }
+  .empty-title { font-size: 20px; }
+  .empty-sub { font-size: 14px; }
+}
 </style>

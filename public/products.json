@@ -1,0 +1,730 @@
+{
+  "updatedAt": "2026-06-18T03:59:29.949Z",
+  "count": 80,
+  "sources": {
+    "woolworths": 152,
+    "coles": 122
+  },
+  "products": [
+    {
+      "store": "Woolworths",
+      "name": "Pepsi Max Cola No Sugar Soft Drink Bottle 1.25L",
+      "size": "1.25L",
+      "was": 3.75,
+      "now": 1.87,
+      "emoji": "🥤",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/007985.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Solo Original Lemon Soft Drink Bottle 1.25L",
+      "size": "1.25L",
+      "was": 3.75,
+      "now": 1.87,
+      "emoji": "🥤",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/032673.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Sunkist Orange Soft Drink Bottle 1.25L",
+      "size": "1.25L",
+      "was": 3.75,
+      "now": 1.87,
+      "emoji": "🥤",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/012011.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Mountain Dew Energised Soft Drink 1.25L",
+      "size": "1.25L",
+      "was": 3.75,
+      "now": 1.87,
+      "emoji": "🥤",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/6033740.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Sunkist Zero Sugar Orange Soft Drink Bottle 1.25L",
+      "size": "1.25L",
+      "was": 3.75,
+      "now": 1.87,
+      "emoji": "🥤",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/676312.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Solo Zero Sugar Original Lemon Soft Drink Bottle 1.25L",
+      "size": "1.25L",
+      "was": 3.75,
+      "now": 1.87,
+      "emoji": "🥤",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/676277.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Pepsi Soft Drink Cola Bottle 1.25L",
+      "size": "1.25L",
+      "was": 3.75,
+      "now": 1.87,
+      "emoji": "🥤",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/6033188.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Dairy Milk Biscoff Mini Chocolate Bars 11 pack",
+      "size": "11 pack",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/6063000.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Kinder Bueno White 39g",
+      "size": "39g",
+      "was": 3,
+      "now": 1.5,
+      "emoji": "🛒",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/532344.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Kinder Bueno Milk Chocolate Bar 43g",
+      "size": "43g",
+      "was": 3,
+      "now": 1.5,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/066527.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Twirl Milk Chocolate Mini Bars 12 pack",
+      "size": "12 pack",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/829166.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Dairy Milk Chocolate Caramello Koala 180g 12 pack",
+      "size": "180g 12 pack",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/829175.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Special Treats Chocolate Mini Bars 180g 12 pack",
+      "size": "180g 12 pack",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/829167.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Dairy Milk Chocolate Share Mini Bars 12 pack 144g",
+      "size": "144g",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/087145.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Dairy Milk Marvellous Creation Chocolate Share Pack 10 Pieces 160g",
+      "size": "160g",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/589914.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Crunchie Milk Chocolate Mini Bars 12 pack",
+      "size": "12 pack",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/829138.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Dairy Milk Chocolate Freddo 12 pack 144g",
+      "size": "144g",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/087143.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Cherry Ripe Dark Chocolate Mini Bars 180g 12 pack",
+      "size": "180g 12 pack",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/829144.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Picnic Milk Chocolate Mini Bars 12 pack",
+      "size": "12 pack",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/829163.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Flake Milk Chocolate Share Mini Bars 12 pack",
+      "size": "12 pack",
+      "was": 7.5,
+      "now": 3.75,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/304748.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Twirl Milk Chocolate Bar 39g",
+      "size": "39g",
+      "was": 3,
+      "now": 1.5,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/320104.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Boost Milk Chocolate Bar 50g",
+      "size": "50g",
+      "was": 3,
+      "now": 1.5,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/602067.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Favourites Chocolate Gift Box 470g",
+      "size": "470g",
+      "was": 24,
+      "now": 12,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/6030976.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Moccona Coffee Sachets Strong Cappuccino 10 pack",
+      "size": "10 pack",
+      "was": 7.9,
+      "now": 3.95,
+      "emoji": "☕",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/174190.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Moccona Coffee Sachets Caramel Latte 10 pack",
+      "size": "10 pack",
+      "was": 7.9,
+      "now": 3.95,
+      "emoji": "☕",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/175028.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Moccona Coffee Sachets Latte 10 pack",
+      "size": "10 pack",
+      "was": 7.9,
+      "now": 3.95,
+      "emoji": "☕",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/174480.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Moccona Coffee Sachets Cappuccino 10 pack",
+      "size": "10 pack",
+      "was": 7.9,
+      "now": 3.95,
+      "emoji": "☕",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/6058610.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Doritos Corn Chips Cheese Supreme Share Pack 170g",
+      "size": "170g",
+      "was": 5,
+      "now": 2.5,
+      "emoji": "🍟",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/826731.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Sunbites Grain Waves Wholegrain Chips Sour Cream & Chives 170g",
+      "size": "170g",
+      "was": 5,
+      "now": 2.5,
+      "emoji": "🍟",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/082361.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Schwarzkopf Extra Care Full Hair Protect Anti-Breakage Shampoo 200mL",
+      "size": "200mL",
+      "was": 19,
+      "now": 9.5,
+      "emoji": "🧴",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/6064546.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Sunsilk Shampoo Longer & Stronger 700mL",
+      "size": "700mL",
+      "was": 13.5,
+      "now": 6.75,
+      "emoji": "🧴",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/463195.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Schwarzkopf Extra Care Ultimate Repair Shampoo For Damaged Hair 400mL",
+      "size": "400mL",
+      "was": 10,
+      "now": 5,
+      "emoji": "🧴",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/153058.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Sunsilk Shampoo Soft & Smooth 700mL",
+      "size": "700mL",
+      "was": 13.5,
+      "now": 6.75,
+      "emoji": "🧴",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/463194.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Sunsilk Conditioner Longer & Stronger 700mL",
+      "size": "700mL",
+      "was": 13.5,
+      "now": 6.75,
+      "emoji": "🧴",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/463186.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Schwarzkopf Extra Care Soft Shampoo Marrakesh Oil For Dry Hair 400mL",
+      "size": "400mL",
+      "was": 10,
+      "now": 5,
+      "emoji": "🧴",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/153354.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Schwarzkopf Extra Care Colour Protecting Shampoo For Coloured Hair 400mL",
+      "size": "400mL",
+      "was": 10,
+      "now": 5,
+      "emoji": "🧴",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/153239.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Oreo Original Cookies 140g",
+      "size": "140g",
+      "was": 3.2,
+      "now": 1.6,
+      "emoji": "🍷",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/6062868.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Cadbury Choc Tops Ice Cream Cones 400mL",
+      "size": "400mL",
+      "was": 12.5,
+      "now": 6.25,
+      "emoji": "🍫",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/919551.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Vanish Gold Pro Turbo Stain Remover Powder 1kg",
+      "size": "1kg",
+      "was": 20,
+      "now": 10,
+      "emoji": "🛒",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/502077.jpg"
+    },
+    {
+      "store": "Woolworths",
+      "name": "Vanish Gold Pro Turbo Stain Remover Powder 2kg",
+      "size": "2kg",
+      "was": 38,
+      "now": 19,
+      "emoji": "🛒",
+      "image": "https://cdn0.woolworths.media/content/wowproductimages/medium/618646.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Sport Drink Blue Bolt",
+      "size": "Gatorade · 600mL",
+      "was": 4.2,
+      "now": 2,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/6/6157082.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Clusters Apple Crumble",
+      "size": "Heritage Mill · 750g",
+      "was": 8.5,
+      "now": 4.2,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/5/5283434.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Clusters Berry Bliss",
+      "size": "Heritage Mill · 750g",
+      "was": 8.5,
+      "now": 4.2,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/5/5283445.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "100% Recycled Paper Towel",
+      "size": "Icare · 2 pack",
+      "was": 3.85,
+      "now": 1.92,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/3/3798342.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Crumpet Rounds Original",
+      "size": "Golden · 300g",
+      "was": 4.8,
+      "now": 2.4,
+      "emoji": "🍷",
+      "image": "https://cdn.productimages.coles.com.au/productimages/3/332383.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Dairy Milk Chocolate Block",
+      "size": "Cadbury · 180g",
+      "was": 8,
+      "now": 4,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2351709.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Tim Tam Chocolate Biscuits Original",
+      "size": "Arnott's · 200g",
+      "was": 6,
+      "now": 3,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/3/329607.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Favourites Ultimate Share Chocolate Gift Box",
+      "size": "Cadbury · 700g",
+      "was": 30,
+      "now": 15,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/1/1115507.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Ultra Dry Nappies Boys Size 5 (13-18kg)",
+      "size": "Huggies · 32 Pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/6/6802559.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Ultra Dry Nappies Boys Size 4 (10-15kg)",
+      "size": "Huggies · 36 pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/6/6803890.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Ultra Dry Nappies Girls Size 4 (10-15kg)",
+      "size": "Huggies · 36 Pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/6/6803100.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Skin Protect Newborn Nappies Size 2",
+      "size": "Huggies · 48 Pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🧼",
+      "image": "https://cdn.productimages.coles.com.au/productimages/3/3114855.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Ultra Dry Nappies Girls Size 5 (13-18kg)",
+      "size": "Huggies · 32 Pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/6/6803110.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Honey Soy Chicken Potato Chips",
+      "size": "Red Rock Deli · 165g",
+      "was": 6,
+      "now": 3,
+      "emoji": "🍟",
+      "image": "https://cdn.productimages.coles.com.au/productimages/1/1786160.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Ultra Dry Nappies Boys Size 6 (16kg+)",
+      "size": "Huggies · 30 Pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/9/9636070.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Tim Tam Chocolate Biscuits Double Coat",
+      "size": "Arnott's · 200g",
+      "was": 6,
+      "now": 3,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/7/7029292.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Ultra Dry Nappies Boys Size 3 (6-11kg)",
+      "size": "Huggies · 44 pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/6/6803904.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Dairy Milk Hazelnut Chocolate Block",
+      "size": "Cadbury · 180g",
+      "was": 8,
+      "now": 4,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2351720.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Dairy Milk Marvellous Creations Jelly Popping Candy Chocolate Block",
+      "size": "Cadbury · 190g",
+      "was": 8,
+      "now": 4,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2898997.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Protein Bars Dark Choc & Cranberry 5 Pack",
+      "size": "Carman's · 200g",
+      "was": 8.5,
+      "now": 4.25,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2129482.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Party Mix Lollies",
+      "size": "The Natural Confectionery Co. · 220g",
+      "was": 5,
+      "now": 2.5,
+      "emoji": "🍬",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2351265.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Laundry Liquid Advanced Clean",
+      "size": "Cold Power · 2L",
+      "was": 26,
+      "now": 13,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/3/3774581.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "100% Recycled Toilet Tissue",
+      "size": "Icare · 8 Pack",
+      "was": 8,
+      "now": 4,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/8/8685092.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Ultra Dry Nappies Girls Size 3 (6-11kg)",
+      "size": "Huggies · 44 pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/6/6803008.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Potato Chips Sweet Chilli And Sour Cream",
+      "size": "Red Rock Deli · 165g",
+      "was": 6,
+      "now": 3,
+      "emoji": "🍟",
+      "image": "https://cdn.productimages.coles.com.au/productimages/1/1786182.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Advanced Whitening Toothpaste And Tartar Control",
+      "size": "Colgate · 115g",
+      "was": 7,
+      "now": 3.5,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/4/4842406.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Favourites Chocolate Gift Box",
+      "size": "Cadbury · 265g",
+      "was": 14,
+      "now": 7,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/1/1115573.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Milk Chocolate Bar Caramel Nougat",
+      "size": "Mars · 47g",
+      "was": 3,
+      "now": 1.5,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/1/138201.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Crumpet Rounds Wholemeal",
+      "size": "Golden · 300g",
+      "was": 4.8,
+      "now": 2.4,
+      "emoji": "🍞",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/292223.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Dairy Milk Top Deck Chocolate Block",
+      "size": "Cadbury · 180g",
+      "was": 8,
+      "now": 4,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2351607.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Greek Yoghurt & Berry Protein Bars",
+      "size": "Carman's · 200g",
+      "was": 8.5,
+      "now": 4.25,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2392513.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "UHT Oat Milk",
+      "size": "Vitasoy · 1L",
+      "was": 3.3,
+      "now": 1.65,
+      "emoji": "🥛",
+      "image": "https://cdn.productimages.coles.com.au/productimages/7/7292254.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Potato Chips Sea Salt",
+      "size": "Red Rock Deli · 165g",
+      "was": 6,
+      "now": 3,
+      "emoji": "🍟",
+      "image": "https://cdn.productimages.coles.com.au/productimages/1/1786150.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Cappuccino Coffee Sachets",
+      "size": "Nescafe · 10 pack",
+      "was": 8,
+      "now": 4,
+      "emoji": "☕",
+      "image": "https://cdn.productimages.coles.com.au/productimages/9/9577540.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Dairy Milk Snack Chocolate Block",
+      "size": "Cadbury · 180g",
+      "was": 8,
+      "now": 4,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2351618.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Skin Protect Newborn Nappies Size 1",
+      "size": "Huggies · 54 Pack",
+      "was": 24,
+      "now": 12,
+      "emoji": "🧼",
+      "image": "https://cdn.productimages.coles.com.au/productimages/7/7259907.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Dairy Milk Biscoff Chocolate Block",
+      "size": "Cadbury · 170g",
+      "was": 8,
+      "now": 4,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/1/1579519.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Dairy Milk Fruit and Nut Chocolate Block",
+      "size": "Cadbury · 180g",
+      "was": 8,
+      "now": 4,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/2/2351651.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Kit Kat Chocolate Milk 4 Finger Bar",
+      "size": "Nestle · 42g",
+      "was": 3,
+      "now": 1.5,
+      "emoji": "🍫",
+      "image": "https://cdn.productimages.coles.com.au/productimages/9/9229441.jpg"
+    },
+    {
+      "store": "Coles",
+      "name": "Pure Natural Coconut Water",
+      "size": "Raw C · 1L",
+      "was": 5.5,
+      "now": 2.75,
+      "emoji": "🛒",
+      "image": "https://cdn.productimages.coles.com.au/productimages/3/3517705.jpg"
+    }
+  ]
+}

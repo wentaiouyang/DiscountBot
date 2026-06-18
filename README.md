@@ -30,15 +30,30 @@ npm run preview  # 预览构建产物
 
 > PWA 的“添加到桌面”能力需要在 **https 或 localhost** 下生效；`npm run preview` 或部署后即可在浏览器菜单中看到“安装 / 添加到主屏幕”。
 
-## 数据来源
+## 数据来源（每周实时抓取）
 
-`src/data/products.js` 内为 **2026-06-17 ~ 06-23 当周真实特价数据**，抓取并整理自：
+商品数据为 **每周定时抓取** 的当周真实特价（澳洲商超每周三上新特价），运行时由前端从 `public/products.json` 拉取：
 
-- Woolworths / Coles 官方周特价目录（含官方商品图 `cdn0.woolworths.media`）
-- Grocerize 比价数据（Coles vs Woolworths 当周最大折扣）
+- **Woolworths** — 官网内部搜索接口 `POST /apis/ui/Search/products`，按多个品类关键词抓取并过滤 `IsOnSpecial`
+- **Coles** — 官网特价页 Next.js 数据 `GET /_next/data/{buildId}/en/on-special.json`（`buildId` 每次从首页动态解析）
 
-由于 Coles / Woolworths 没有公开 API 且有反爬限制，数据为抓取当周快照。
-要更新数据，直接编辑 `src/data/products.js` 中的 `raw` 数组即可（`saved` 与 `percentOff` 会自动计算）。
+抓取脚本：[`scripts/scrape-specials.mjs`](scripts/scrape-specials.mjs)，本地手动跑一次：
+
+```bash
+npm run scrape    # 重新生成 public/products.json
+```
+
+每周自动更新由 GitHub Action [`update-specials.yml`](.github/workflows/update-specials.yml) 负责
+（每周三早上定时运行脚本并提交 `products.json`，也可在 Actions 页面手动触发）。
+
+**容错设计**：
+
+- 两个门店相互独立，任一抓取失败不影响另一个；两边都失败时保留旧数据不覆盖。
+- 前端拉取失败 / 离线时，自动回退到 `src/data/products.js` 内置的精选快照，保证永远有内容可滑。
+- Service Worker 对 `products.json` 采用 **网络优先**（每周刷新），其余静态资源缓存优先。
+
+> 由于 Coles / Woolworths 没有公开 API 且有反爬限制，以上为其前端自用的内部接口，可能随官网改版失效；
+> 失效时前端会自动回退到内置快照，修复抓取脚本即可恢复实时数据。
 
 ## 目录结构
 
@@ -47,14 +62,19 @@ discountBot/
 ├── index.html
 ├── vite.config.js
 ├── package.json
+├── scripts/
+│   └── scrape-specials.mjs    # 每周抓取 Woolworths/Coles 特价
+├── .github/workflows/
+│   └── update-specials.yml    # 定时运行抓取脚本并提交数据
 ├── public/
+│   ├── products.json          # 抓取产物：实时特价数据（前端运行时拉取）
 │   ├── manifest.webmanifest   # PWA 清单
-│   ├── sw.js                  # Service Worker
+│   ├── sw.js                  # Service Worker（products.json 网络优先）
 │   └── icons/                 # 应用图标
 └── src/
     ├── main.js                # 入口 + Vuetify + SW 注册
-    ├── App.vue                # 布局 / 筛选 / 购物车状态
-    ├── data/products.js       # 打折商品数据
+    ├── App.vue                # 布局 / 筛选 / 购物车 / 异步加载数据
+    ├── data/products.js       # loadProducts() 拉取实时数据 + 内置兜底快照
     └── components/
         ├── SwipeCard.vue      # 单张滑动卡片
         ├── SwipeDeck.vue      # 卡堆 + 操作按钮

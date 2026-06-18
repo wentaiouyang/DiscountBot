@@ -1,0 +1,40 @@
+name: Update specials data
+
+# 每周定时抓取 Woolworths / Coles 当周特价，更新 public/products.json
+on:
+  schedule:
+    # 每周二 UTC 19:00 ≈ 周三澳东早上 5/6 点（澳洲商超每周三上新特价）
+    - cron: '0 19 * * 2'
+  workflow_dispatch: {}      # 也可在 Actions 页面手动触发
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-specials
+  cancel-in-progress: true
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Scrape specials
+        run: node scripts/scrape-specials.mjs
+
+      - name: Commit updated products.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- public/products.json; then
+            echo "数据无变化，跳过提交"
+          else
+            git add public/products.json
+            git commit -m "chore: update specials data $(date -u +%Y-%m-%d)"
+            git push
+          fi

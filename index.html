@@ -13,6 +13,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="SwipeSpecials" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <style>
+      :root {
+        /* 暴露安全区域内边距，供 JS / CSS 读取（PWA 全面屏适配） */
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      /* overflow-x: clip 防止横向溢出滚动，且不影响 sticky（区别于 hidden） */
+      html, body { margin: 0; background: #f3f1ec; overscroll-behavior: none; overflow-x: clip; }
+    </style>
   </head>
   <body>
     <div id="app"></div>
