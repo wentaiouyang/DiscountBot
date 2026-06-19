@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -50,31 +50,33 @@
         --nope: #FF3D5E;
       }
 
-      /* ===== 浅色主题（冷调干净）===== */
+      /* ===== 浅色主题（柔和·空气感·默认）===== */
+      :root,
       [data-theme='light'] {
         color-scheme: light;
-        --bg-solid: #ECEEF2;
-        --blob-neutral: rgba(12, 14, 24, 0.05);
+        --bg-solid: #EEF2F8;
+        --blob-neutral: rgba(40, 60, 110, 0.045);
 
         --surface: #FFFFFF;
-        --surface-2: #F5F6F9;
-        --surface-sunken: #ECEEF2;
-        --border: rgba(12, 14, 24, 0.10);
-        --border-strong: rgba(12, 14, 24, 0.16);
+        --surface-2: #F4F7FC;
+        --surface-sunken: #E9EEF6;
+        --border: rgba(30, 42, 70, 0.08);
+        --border-strong: rgba(30, 42, 70, 0.13);
 
-        --text: #0E0F16;
-        --text-muted: #5E6270;
-        --text-faint: #9AA0AD;
+        --text: #1B2433;
+        --text-muted: #6A7387;
+        --text-faint: #A3ABB9;
 
-        --save-bg: rgba(18, 184, 119, 0.14);
+        --save-bg: rgba(18, 184, 119, 0.13);
         --save-text: #0A8F5A;
-        --discount-bg: #0E0F16;
+        --discount-bg: #1B2433;
         --discount-text: #FFFFFF;
 
-        --shadow-card: 0 24px 50px -20px rgba(12, 14, 24, 0.28), 0 10px 22px -10px rgba(12, 14, 24, 0.12);
-        --shadow-soft: 0 10px 30px rgba(12, 14, 24, 0.10);
+        /* 柔和、冷调晕开的阴影，营造悬浮空气感 */
+        --shadow-card: 0 30px 64px -28px rgba(40, 60, 110, 0.30), 0 10px 26px -14px rgba(40, 60, 110, 0.12);
+        --shadow-soft: 0 14px 36px -16px rgba(40, 60, 110, 0.18);
         --shadow-pop: var(--accent-glow);
-        --card-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+        --card-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
       }
 
       /* ===== 深色主题（冷调炭黑·高对比·默认；data-theme 始终存在于 <html>）===== */

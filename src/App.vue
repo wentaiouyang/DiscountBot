@@ -10,8 +10,8 @@ const { mobile } = useDisplay()
 /* ---- 主题（浅色 / 深色）---- */
 const vTheme = useTheme()
 const stored = localStorage.getItem('ss-theme')
-// 默认深色（炭黑高对比为主视觉）；用户手动切换后记忆其选择
-const isDark = ref(stored ? stored === 'dark' : true)
+// 默认浅色（柔和空气感为主视觉）；用户手动切换后记忆其选择
+const isDark = ref(stored ? stored === 'dark' : false)
 
 function applyTheme(dark) {
   const name = dark ? 'dark' : 'light'

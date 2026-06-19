@@ -28,14 +28,14 @@ const storeColor = computed(() =>
   props.product.store === 'Coles' ? '#E5231B' : '#178841'
 )
 
-// 媒体区底色：有图时给一层极淡的门店色渐变衬底（商品图多为白底，
-// 衬底让图片不再「浮」在纯白上）；无图/加载失败时用更明显的门店色光晕承托 emoji。
+// 媒体区底色：始终用「浅色」门店色晕染的舞台（不随深浅色主题变化），
+// 这样商品图用 mix-blend-mode: multiply 抠掉白底后，能干净地「悬浮」在这层柔色上。
 const mediaBg = computed(() => {
   const c = storeColor.value
   if (imgError.value || !props.product.image) {
-    return `radial-gradient(circle at 50% 36%, ${c}30, ${c}0d 68%)`
+    return `radial-gradient(circle at 50% 38%, ${c}26, ${c}0a 70%)`
   }
-  return `linear-gradient(180deg, #ffffff 0%, ${c}12 100%)`
+  return `linear-gradient(170deg, color-mix(in srgb, ${c} 6%, #ffffff) 0%, color-mix(in srgb, ${c} 16%, #ffffff) 100%)`
 })
 
 // 拖动时卡片的变换（含旋转）。z-index 让「当前可操作卡片」始终位于卡堆最上层，
@@ -186,6 +186,7 @@ defineExpose({ fly })
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  isolation: isolate; /* 把 multiply 混合限制在媒体区内，只与本层柔色舞台混合 */
 }
 /* 顶部柔光：一层从上而下的高光，给媒体区一点曲面质感 */
 .card-media::after {
@@ -202,8 +203,10 @@ defineExpose({ fly })
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 16px;
+  padding: 22px;
   pointer-events: none;
+  /* 抠掉商品图的白底：白 ×柔色舞台 = 柔色，商品本体保留 → 悬浮效果 */
+  mix-blend-mode: multiply;
   opacity: 0;
   transform: scale(0.96);
   transition: opacity .35s ease, transform .45s cubic-bezier(.18,.89,.32,1.28);

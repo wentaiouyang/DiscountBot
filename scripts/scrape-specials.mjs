@@ -27,8 +27,9 @@ puppeteer.use(Stealth())
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = resolve(__dirname, '../public/products.json')
 
-// 每个门店最多保留多少件（按折扣力度排序后截断）
-const PER_STORE = 40
+// 每个门店最多保留多少件（按折扣力度降序后截断）。
+// 默认涵盖所有折扣产品（任意折扣，不止半价）；可用 SCRAPE_PER_STORE 调小做精选。
+const PER_STORE = Number(env.SCRAPE_PER_STORE) || 200
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const round2 = (n) => Math.round(n * 100) / 100
