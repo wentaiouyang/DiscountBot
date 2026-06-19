@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   product: { type: Object, required: true },
@@ -146,7 +147,7 @@ defineExpose({ fly })
         v-if="active"
         class="track-btn"
         :class="{ on: tracked }"
-        :aria-label="tracked ? '取消追踪' : '追踪这件商品'"
+        :aria-label="tracked ? t('trackOff') : t('trackOn')"
         :aria-pressed="tracked"
         @pointerdown.stop
         @click.stop="emit('track')"
@@ -155,8 +156,8 @@ defineExpose({ fly })
       </button>
 
       <!-- 滑动提示 -->
-      <div class="stamp like" :style="{ opacity: likeOpacity }">加入 ♥</div>
-      <div class="stamp nope" :style="{ opacity: nopeOpacity }">跳过 ✕</div>
+      <div class="stamp like" :style="{ opacity: likeOpacity }">{{ t('stampAdd') }} ♥</div>
+      <div class="stamp nope" :style="{ opacity: nopeOpacity }">{{ t('stampSkip') }} ✕</div>
     </div>
 
     <!-- 信息区 -->
@@ -166,7 +167,7 @@ defineExpose({ fly })
       <div class="price-row">
         <span class="now">${{ product.now.toFixed(2) }}</span>
         <span class="was">${{ product.was.toFixed(2) }}</span>
-        <span class="save">省 ${{ product.saved.toFixed(2) }}</span>
+        <span class="save">{{ t('save') }} ${{ product.saved.toFixed(2) }}</span>
       </div>
     </div>
   </div>

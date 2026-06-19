@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { SECTIONS, sectionFor } from '../data/sections.js'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   items: { type: Array, required: true },
@@ -36,36 +37,36 @@ function togglePicked(id) {
     <div class="list-head">
       <div class="title">
         <v-icon>mdi-cart</v-icon>
-        购物清单
+        {{ t('shoppingList') }}
         <span class="count">{{ items.length }}</span>
       </div>
       <v-btn v-if="items.length" variant="text" size="small" color="grey" @click="emit('clear')">
-        清空
+        {{ t('clear') }}
       </v-btn>
     </div>
 
     <!-- 走店路线条：按区域顺序 -->
     <div v-if="groups.length > 1" class="route-bar">
       <template v-for="(g, i) in groups" :key="g.key">
-        <span class="route-step">{{ g.emoji }} {{ g.label }}</span>
+        <span class="route-step">{{ g.emoji }} {{ t('sec_' + g.key) }}</span>
         <v-icon v-if="i < groups.length - 1" size="14" class="route-arrow">mdi-arrow-right</v-icon>
       </template>
     </div>
 
     <div class="list-body">
       <div v-if="!items.length" class="list-empty">
-        右滑商品即可加入这里 👉
+        {{ t('listEmpty') }}
       </div>
 
       <div v-for="g in groups" v-else :key="g.key" class="section">
         <div class="section-head">
           <span class="sec-emoji">{{ g.emoji }}</span>
-          {{ g.label }}
+          {{ t('sec_' + g.key) }}
           <span class="sec-count">{{ g.items.length }}</span>
         </div>
         <transition-group name="list" tag="div">
           <div v-for="p in g.items" :key="p.id" class="row" :class="{ picked: picked.has(p.id) }">
-            <button class="check" :aria-pressed="picked.has(p.id)" aria-label="标记已拿" @click="togglePicked(p.id)">
+            <button class="check" :aria-pressed="picked.has(p.id)" :aria-label="t('markPicked')" @click="togglePicked(p.id)">
               <v-icon size="18">{{ picked.has(p.id) ? 'mdi-check-circle' : 'mdi-checkbox-blank-circle-outline' }}</v-icon>
             </button>
             <div class="row-emoji" :class="p.store">
@@ -90,12 +91,12 @@ function togglePicked(id) {
 
     <div class="totals">
       <div class="t-row">
-        <span>合计</span>
+        <span>{{ t('total') }}</span>
         <span class="t-total">${{ total.toFixed(2) }}</span>
       </div>
       <div class="t-row sub">
-        <span>原价 <s>${{ totalWas.toFixed(2) }}</s></span>
-        <span class="t-saved">共省 ${{ totalSaved.toFixed(2) }} ({{ savedPct }}%)</span>
+        <span>{{ t('wasPrefix') }} <s>${{ totalWas.toFixed(2) }}</s></span>
+        <span class="t-saved">{{ t('savedTotal', { amt: totalSaved.toFixed(2), pct: savedPct }) }}</span>
       </div>
     </div>
   </div>

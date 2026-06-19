@@ -5,6 +5,7 @@ import { loadProducts, fallbackProducts } from './data/products.js'
 import SwipeDeck from './components/SwipeDeck.vue'
 import ShoppingList from './components/ShoppingList.vue'
 import TrackedList from './components/TrackedList.vue'
+import { lang, toggleLang, t, formatDate } from './i18n.js'
 
 const { mobile } = useDisplay()
 
@@ -69,12 +70,7 @@ onMounted(async () => {
   checkTracked()
 })
 
-const updatedLabel = computed(() => {
-  if (!dataUpdatedAt.value) return ''
-  const d = new Date(dataUpdatedAt.value)
-  if (Number.isNaN(d.getTime())) return ''
-  return `${d.getMonth() + 1}月${d.getDate()}日`
-})
+const updatedLabel = computed(() => formatDate(dataUpdatedAt.value))
 
 // PWA 全面屏：测量顶部安全区高度，把顶栏整体下移，避免被系统状态栏/灵动岛遮挡。
 // 用探针元素读取已解析的 px 值（env() 写进 CSS 变量后用 getComputedStyle 读取并不可靠）。
@@ -206,14 +202,21 @@ function openTracked() {
       </div>
       <v-spacer />
       <div class="filter-pills">
-        <button :class="{ on: filter === 'all' }" @click="setFilter('all')">全部</button>
+        <button :class="{ on: filter === 'all' }" @click="setFilter('all')">{{ t('all') }}</button>
         <button :class="{ on: filter === 'Coles', coles: true }" @click="setFilter('Coles')">Coles</button>
         <button :class="{ on: filter === 'Woolworths', woolies: true }" @click="setFilter('Woolworths')">Woolies</button>
       </div>
       <button
+        class="lang-toggle"
+        :aria-label="t('langAria')"
+        @click="toggleLang"
+      >
+        {{ lang === 'en' ? '中' : 'EN' }}
+      </button>
+      <button
         class="track-bell"
         :class="{ active: trackedOnSaleCount }"
-        aria-label="追踪商品"
+        :aria-label="t('trackAria')"
         @click="openTracked"
       >
         <v-icon size="20">mdi-bell-outline</v-icon>
@@ -221,7 +224,7 @@ function openTracked() {
       </button>
       <button
         class="theme-toggle"
-        :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'"
+        :aria-label="isDark ? t('themeToLight') : t('themeToDark')"
         :aria-pressed="isDark"
         @click="isDark = !isDark"
       >
@@ -239,14 +242,14 @@ function openTracked() {
             class="track-banner"
             @click="openTracked"
           >
-            <span class="tb-text">🔔 {{ newlyOnSale.length }} 件追踪商品现在打折了</span>
+            <span class="tb-text">{{ t('trackBanner', { n: newlyOnSale.length }) }}</span>
             <v-icon class="tb-close" size="18" @click.stop="bannerDismissed = true">mdi-close</v-icon>
           </button>
           <p class="data-status" :class="{ live: dataLive && !loading, offline: !dataLive && !loading }">
             <span class="status-dot"></span>
-            <template v-if="loading">正在加载实时特价…</template>
-            <template v-else-if="dataLive">实时特价 · 更新于 {{ updatedLabel }}</template>
-            <template v-else>离线快照</template>
+            <template v-if="loading">{{ t('loading') }}</template>
+            <template v-else-if="dataLive">{{ t('liveUpdated', { date: updatedLabel }) }}</template>
+            <template v-else>{{ t('offline') }}</template>
           </p>
           <SwipeDeck
             ref="deck"
@@ -274,16 +277,16 @@ function openTracked() {
       </div>
       <div class="mb-mid">
         <div class="mb-total">${{ cartTotal.toFixed(2) }}</div>
-        <div class="mb-saved">已省 ${{ cartSaved.toFixed(2) }}</div>
+        <div class="mb-saved">{{ t('savedPrefix') }} ${{ cartSaved.toFixed(2) }}</div>
       </div>
-      <v-btn class="mb-cta" variant="flat" rounded>查看清单</v-btn>
+      <v-btn class="mb-cta" variant="flat" rounded>{{ t('viewList') }}</v-btn>
     </div>
 
     <!-- 移动端：购物清单抽屉 -->
     <v-bottom-sheet v-model="sheet">
       <div class="sheet">
         <ShoppingList :items="cart" @remove="removeFromCart" @clear="clearCart" />
-        <v-btn block class="sheet-cta mt-3" @click="sheet = false">继续滑</v-btn>
+        <v-btn block class="sheet-cta mt-3" @click="sheet = false">{{ t('keepSwiping') }}</v-btn>
       </div>
     </v-bottom-sheet>
 
@@ -291,7 +294,7 @@ function openTracked() {
     <v-bottom-sheet v-model="trackedSheet">
       <div class="sheet">
         <TrackedList :items="trackedView" @remove="toggleTrack" @add="addToCart" />
-        <v-btn block class="sheet-cta mt-3" @click="trackedSheet = false">继续滑</v-btn>
+        <v-btn block class="sheet-cta mt-3" @click="trackedSheet = false">{{ t('keepSwiping') }}</v-btn>
       </div>
     </v-bottom-sheet>
   </v-app>
@@ -372,6 +375,25 @@ function openTracked() {
 }
 .theme-toggle:hover { color: var(--text); border-color: var(--text-faint); }
 .theme-toggle:active { transform: scale(.9) rotate(18deg); }
+
+/* 语言切换（顶栏，文字按钮 EN / 中）*/
+.lang-toggle {
+  margin-left: 8px;
+  min-width: 36px; height: 38px;
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s ease, color .2s ease, border-color .2s ease;
+}
+.lang-toggle:hover { color: var(--text); border-color: var(--text-faint); }
+.lang-toggle:active { transform: scale(.9); }
 
 /* 追踪铃铛（顶栏）*/
 .track-bell {
@@ -563,9 +585,10 @@ function openTracked() {
     flex-shrink: 0;        /* 筛选按钮不被压缩 */
   }
   .filter-pills button { padding: 5px 10px; font-size: 12px; white-space: nowrap; }
-  /* 顶栏右侧按钮收紧，给铃铛腾出空间 */
-  .track-bell { margin-left: 7px; width: 36px; height: 36px; }
-  .theme-toggle { margin: 0 12px 0 7px; width: 36px; height: 36px; }
+  /* 顶栏右侧按钮收紧，放下语言/铃铛/主题三个键 */
+  .lang-toggle { margin-left: 6px; min-width: 34px; height: 36px; padding: 0 6px; font-size: 12.5px; }
+  .track-bell { margin-left: 6px; width: 36px; height: 36px; }
+  .theme-toggle { margin: 0 10px 0 6px; width: 36px; height: 36px; }
 
   .layout { padding: 14px 12px 96px; }  /* 给底部结算条留出空间 */
   .hint { font-size: 14px; margin-bottom: 12px; }

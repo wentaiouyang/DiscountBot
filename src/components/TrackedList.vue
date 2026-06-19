@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   // 每项：{ id, name, store, size, image, emoji, was, now, onSale, current }
@@ -23,14 +24,14 @@ function pct(p) {
     <div class="track-head">
       <div class="title">
         <v-icon>mdi-bell-outline</v-icon>
-        追踪商品
-        <span v-if="onSaleCount" class="count">{{ onSaleCount }} 在打折</span>
+        {{ t('tracked') }}
+        <span v-if="onSaleCount" class="count">{{ t('onSaleCount', { n: onSaleCount }) }}</span>
       </div>
     </div>
 
     <div class="track-body">
       <div v-if="!items.length" class="track-empty">
-        滑卡时点 🔔 追踪商品，<br />它再次打折时这里会提醒你
+        {{ t('trackedEmpty') }}
       </div>
 
       <transition-group v-else name="list" tag="div">
@@ -48,7 +49,7 @@ function pct(p) {
                 <span class="r-store" :class="p.store">{{ p.store }}</span>
               </template>
               <template v-else>
-                <span class="r-rest">本周不在售</span>
+                <span class="r-rest">{{ t('notOnSale') }}</span>
                 <span class="r-store" :class="p.store">{{ p.store }}</span>
               </template>
             </div>
@@ -56,12 +57,12 @@ function pct(p) {
           <button
             v-if="p.onSale"
             class="row-add"
-            aria-label="加入清单"
+            :aria-label="t('addToList')"
             @click="emit('add', p.current)"
           >
             <v-icon size="20">mdi-cart-plus</v-icon>
           </button>
-          <button class="row-del" aria-label="取消追踪" @click="emit('remove', p)">
+          <button class="row-del" :aria-label="t('untrack')" @click="emit('remove', p)">
             <v-icon size="20">mdi-bell-off-outline</v-icon>
           </button>
         </div>

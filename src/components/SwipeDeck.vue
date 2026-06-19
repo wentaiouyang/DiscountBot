@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import SwipeCard from './SwipeCard.vue'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   products: { type: Array, required: true },
@@ -56,16 +57,16 @@ defineExpose({ reset })
 
       <div v-else class="empty">
         <div class="empty-emoji">🎉</div>
-        <div class="empty-title">全部看完啦！</div>
-        <div class="empty-sub">看看右边的购物清单，结算省下的钱吧</div>
+        <div class="empty-title">{{ t('allDone') }}</div>
+        <div class="empty-sub">{{ t('allDoneSub') }}</div>
       </div>
     </div>
 
     <!-- 滑动提示 + 剩余计数（左滑跳过 / 右滑加入） -->
     <div v-if="!done" class="swipe-hint">
-      <span class="hint-side nope">← 跳过</span>
-      <span class="counter">还剩 {{ remaining }} 件</span>
-      <span class="hint-side like">加入 →</span>
+      <span class="hint-side nope">← {{ t('skip') }}</span>
+      <span class="counter">{{ t('remaining', { n: remaining }) }}</span>
+      <span class="hint-side like">{{ t('add') }} →</span>
     </div>
   </div>
 </template>

@@ -5,18 +5,19 @@
 // 不是精确门店导航，但足以把清单按区域分组、按逛店顺序排出一条路线。
 
 // 区域按「逛店顺序」排列（生鲜在入口、冷冻和日用靠结账区）。
+// 显示名走 i18n（key 形如 sec_produce），这里只保留 key + emoji。
 export const SECTIONS = [
-  { key: 'produce',   label: '生鲜果蔬', emoji: '🥬' },
-  { key: 'bakery',    label: '烘焙面包', emoji: '🍞' },
-  { key: 'meat',      label: '肉禽海鲜', emoji: '🥩' },
-  { key: 'dairy',     label: '乳制品·蛋', emoji: '🧀' },
-  { key: 'pantry',    label: '干货调味', emoji: '🥫' },
-  { key: 'snacks',    label: '零食糖果', emoji: '🍫' },
-  { key: 'drinks',    label: '饮料酒水', emoji: '🥤' },
-  { key: 'frozen',    label: '冷冻食品', emoji: '🧊' },
-  { key: 'health',    label: '个护美妆', emoji: '🧴' },
-  { key: 'household', label: '家居清洁', emoji: '🧻' },
-  { key: 'other',     label: '其他',     emoji: '🛒' },
+  { key: 'produce',   emoji: '🥬' },
+  { key: 'bakery',    emoji: '🍞' },
+  { key: 'meat',      emoji: '🥩' },
+  { key: 'dairy',     emoji: '🧀' },
+  { key: 'pantry',    emoji: '🥫' },
+  { key: 'snacks',    emoji: '🍫' },
+  { key: 'drinks',    emoji: '🥤' },
+  { key: 'frozen',    emoji: '🧊' },
+  { key: 'health',    emoji: '🧴' },
+  { key: 'household', emoji: '🧻' },
+  { key: 'other',     emoji: '🛒' },
 ]
 
 const SECTION_META = Object.fromEntries(SECTIONS.map((s) => [s.key, s]))
