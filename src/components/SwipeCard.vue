@@ -7,9 +7,11 @@ const props = defineProps({
   active: { type: Boolean, default: false },
   // 叠放层级（用于轻微缩放/位移营造卡堆效果）
   depth: { type: Number, default: 0 },
+  // 是否已被追踪（收藏）
+  tracked: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['swiped'])
+const emit = defineEmits(['swiped', 'track'])
 
 const THRESHOLD = 110 // 触发滑动的位移阈值(px)
 
@@ -138,6 +140,19 @@ defineExpose({ fly })
 
       <!-- 折扣角标 -->
       <div class="discount-badge">-{{ product.percentOff }}%</div>
+
+      <!-- 追踪（收藏）按钮：只在顶层卡片显示；阻止指针冒泡，避免触发滑动 -->
+      <button
+        v-if="active"
+        class="track-btn"
+        :class="{ on: tracked }"
+        :aria-label="tracked ? '取消追踪' : '追踪这件商品'"
+        :aria-pressed="tracked"
+        @pointerdown.stop
+        @click.stop="emit('track')"
+      >
+        <v-icon size="20">{{ tracked ? 'mdi-bell' : 'mdi-bell-outline' }}</v-icon>
+      </button>
 
       <!-- 滑动提示 -->
       <div class="stamp like" :style="{ opacity: likeOpacity }">加入 ♥</div>
@@ -268,6 +283,35 @@ defineExpose({ fly })
   box-shadow: var(--shadow-pop), inset 0 1px 0 rgba(255,255,255,.4);
   font-variant-numeric: tabular-nums;
 }
+/* 追踪按钮：玻璃质感小圆钮，置于媒体区右下角 */
+.track-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(6px);
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(20, 30, 50, 0.16);
+  transition: transform .15s cubic-bezier(.18,.89,.32,1.28), color .2s ease, background .2s ease;
+}
+.track-btn:active { transform: scale(.86); }
+.track-btn.on {
+  color: var(--accent);
+  background: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .track-btn:active { transform: none; }
+}
+
 .stamp {
   position: absolute;
   top: 28px;

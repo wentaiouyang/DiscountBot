@@ -184,6 +184,7 @@ async function scrapeWoolies(browser) {
     }
     for (const p of r.out) {
       byCode.set(p.code, {
+        id: `W:${p.code}`, // 稳定 id（跨周追踪用）
         store: 'Woolworths', name: p.name, size: p.size,
         was: round2(p.was), now: round2(p.now),
         emoji: emojiFor(p.raw || p.name), image: p.image,
@@ -234,6 +235,7 @@ async function scrapeColes(browser) {
         if (byId.has(id)) continue
         const { name, size } = splitColesTitle(it.title)
         byId.set(id, {
+          id: `C:${id}`, // 稳定 id（跨周追踪用）
           store: 'Coles', name, size,
           was: round2(was), now: round2(now),
           emoji: emojiFor(it.title), image: it.img || null,

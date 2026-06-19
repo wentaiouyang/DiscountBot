@@ -4,6 +4,7 @@ import { useDisplay, useTheme } from 'vuetify'
 import { loadProducts, fallbackProducts } from './data/products.js'
 import SwipeDeck from './components/SwipeDeck.vue'
 import ShoppingList from './components/ShoppingList.vue'
+import TrackedList from './components/TrackedList.vue'
 
 const { mobile } = useDisplay()
 
@@ -64,6 +65,8 @@ onMounted(async () => {
   dataUpdatedAt.value = updatedAt
   dataLive.value = live
   loading.value = false
+  // 数据就绪后比对追踪项，弹出“重新打折”提醒
+  checkTracked()
 })
 
 const updatedLabel = computed(() => {
@@ -122,6 +125,63 @@ function setFilter(v) {
 }
 
 applyAccent(filter.value)
+
+/* ---- 追踪：本地收藏 + 重新打折提醒（无后端）---- */
+const TRACK_KEY = 'ss-tracked'
+function loadTracked() {
+  try {
+    const v = JSON.parse(localStorage.getItem(TRACK_KEY) || '[]')
+    return Array.isArray(v) ? v : []
+  } catch { return [] }
+}
+const tracked = ref(loadTracked())
+watch(tracked, (v) => localStorage.setItem(TRACK_KEY, JSON.stringify(v)), { deep: true })
+
+const trackedIds = computed(() => new Set(tracked.value.map((t) => t.id)))
+function toggleTrack(p) {
+  if (!p?.id) return
+  const i = tracked.value.findIndex((t) => t.id === p.id)
+  if (i >= 0) { tracked.value.splice(i, 1); return }
+  // 加入时存快照 + 标记“当前在售”，避免下次打开就误报“重新打折”
+  tracked.value.push({
+    id: p.id, store: p.store, name: p.name, size: p.size || '',
+    image: p.image || null, emoji: p.emoji, was: p.was, now: p.now,
+    addedAt: Date.now(), wasOnSaleLastOpen: true,
+  })
+}
+
+// 本周在售商品（按 id 索引），用于判断追踪项是否正在打折
+const onSaleMap = computed(() => {
+  const m = new Map()
+  for (const p of allProducts.value) m.set(p.id, p)
+  return m
+})
+// 追踪项 + 当前在售状态
+const trackedView = computed(() =>
+  tracked.value.map((t) => {
+    const current = onSaleMap.value.get(t.id) || null
+    return { ...t, onSale: !!current, current }
+  }),
+)
+const trackedOnSaleCount = computed(() => trackedView.value.filter((t) => t.onSale).length)
+
+// 打开 App 时比对：找出“本次新打折”的追踪项，并刷新状态标记
+const newlyOnSale = ref([])
+const bannerDismissed = ref(false)
+const trackedSheet = ref(false)
+function checkTracked() {
+  const newly = []
+  for (const t of tracked.value) {
+    const onSale = onSaleMap.value.has(t.id)
+    if (onSale && !t.wasOnSaleLastOpen) newly.push(t)
+    t.wasOnSaleLastOpen = onSale
+  }
+  newlyOnSale.value = newly
+}
+function openTracked() {
+  bannerDismissed.value = true
+  trackedSheet.value = true
+}
 </script>
 
 <template>
@@ -151,6 +211,15 @@ applyAccent(filter.value)
         <button :class="{ on: filter === 'Woolworths', woolies: true }" @click="setFilter('Woolworths')">Woolies</button>
       </div>
       <button
+        class="track-bell"
+        :class="{ active: trackedOnSaleCount }"
+        aria-label="追踪商品"
+        @click="openTracked"
+      >
+        <v-icon size="20">mdi-bell-outline</v-icon>
+        <span v-if="trackedOnSaleCount" class="bell-badge">{{ trackedOnSaleCount }}</span>
+      </button>
+      <button
         class="theme-toggle"
         :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'"
         :aria-pressed="isDark"
@@ -164,6 +233,15 @@ applyAccent(filter.value)
       <div class="layout" :class="{ desktop: !mobile }">
         <!-- 滑卡区 -->
         <section class="deck-col">
+          <!-- 追踪商品重新打折提醒 -->
+          <button
+            v-if="newlyOnSale.length && !bannerDismissed"
+            class="track-banner"
+            @click="openTracked"
+          >
+            <span class="tb-text">🔔 {{ newlyOnSale.length }} 件追踪商品现在打折了</span>
+            <v-icon class="tb-close" size="18" @click.stop="bannerDismissed = true">mdi-close</v-icon>
+          </button>
           <p class="data-status" :class="{ live: dataLive && !loading, offline: !dataLive && !loading }">
             <span class="status-dot"></span>
             <template v-if="loading">正在加载实时特价…</template>
@@ -174,8 +252,10 @@ applyAccent(filter.value)
             ref="deck"
             :key="filter + ':' + allProducts.length"
             :products="filtered"
+            :tracked-ids="trackedIds"
             @like="addToCart"
             @nope="() => {}"
+            @track="toggleTrack"
           />
         </section>
 
@@ -204,6 +284,14 @@ applyAccent(filter.value)
       <div class="sheet">
         <ShoppingList :items="cart" @remove="removeFromCart" @clear="clearCart" />
         <v-btn block class="sheet-cta mt-3" @click="sheet = false">继续滑</v-btn>
+      </div>
+    </v-bottom-sheet>
+
+    <!-- 追踪商品抽屉 -->
+    <v-bottom-sheet v-model="trackedSheet">
+      <div class="sheet">
+        <TrackedList :items="trackedView" @remove="toggleTrack" @add="addToCart" />
+        <v-btn block class="sheet-cta mt-3" @click="trackedSheet = false">继续滑</v-btn>
       </div>
     </v-bottom-sheet>
   </v-app>
@@ -284,6 +372,57 @@ applyAccent(filter.value)
 }
 .theme-toggle:hover { color: var(--text); border-color: var(--text-faint); }
 .theme-toggle:active { transform: scale(.9) rotate(18deg); }
+
+/* 追踪铃铛（顶栏）*/
+.track-bell {
+  position: relative;
+  margin-left: 8px;
+  width: 38px; height: 38px;
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: transform .15s ease, color .2s ease, border-color .2s ease;
+}
+.track-bell:hover { color: var(--text); border-color: var(--text-faint); }
+.track-bell:active { transform: scale(.9); }
+.track-bell.active { color: var(--accent); border-color: var(--accent); }
+.bell-badge {
+  position: absolute; top: -6px; right: -6px;
+  min-width: 17px; height: 17px; padding: 0 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: var(--like); color: #fff;
+  font-family: var(--font-display);
+  font-size: 10px; font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 6px rgba(18, 184, 119, .5);
+}
+
+/* 重新打折提醒横幅 */
+.track-banner {
+  display: inline-flex; align-items: center; gap: 10px;
+  max-width: 360px;
+  margin: 0 0 14px;
+  padding: 9px 10px 9px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 600; font-size: 13.5px;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  animation: banner-in .4s cubic-bezier(.18,.89,.32,1.28) both;
+}
+.track-banner:active { transform: scale(.99); }
+.tb-close { color: var(--text-muted); border-radius: 6px; }
+.tb-close:hover { color: var(--text); }
+@keyframes banner-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .track-banner { animation: none; } }
 
 .main { background: transparent; position: relative; z-index: 1; }
 .layout {
@@ -421,10 +560,12 @@ applyAccent(filter.value)
   .logo { font-size: 22px; }
   .filter-pills {
     gap: 5px;
-    padding-right: 12px;
     flex-shrink: 0;        /* 筛选按钮不被压缩 */
   }
   .filter-pills button { padding: 5px 10px; font-size: 12px; white-space: nowrap; }
+  /* 顶栏右侧按钮收紧，给铃铛腾出空间 */
+  .track-bell { margin-left: 7px; width: 36px; height: 36px; }
+  .theme-toggle { margin: 0 12px 0 7px; width: 36px; height: 36px; }
 
   .layout { padding: 14px 12px 96px; }  /* 给底部结算条留出空间 */
   .hint { font-size: 14px; margin-bottom: 12px; }
@@ -434,8 +575,8 @@ applyAccent(filter.value)
   .mb-count { font-size: 12px; }
 }
 
-/* 超窄屏（小手机）：隐藏品牌文字，仅留购物车图标，确保筛选按钮完整显示 */
-@media (max-width: 380px) {
+/* 手机端：隐藏品牌文字，仅留购物车图标，确保筛选 + 铃铛 + 主题键都放得下 */
+@media (max-width: 460px) {
   .brand-name { display: none; }
 }
 </style>

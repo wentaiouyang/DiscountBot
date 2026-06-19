@@ -4,8 +4,10 @@ import SwipeCard from './SwipeCard.vue'
 
 const props = defineProps({
   products: { type: Array, required: true },
+  // 已追踪商品的 id 集合
+  trackedIds: { type: Object, default: () => new Set() },
 })
-const emit = defineEmits(['like', 'nope', 'finished'])
+const emit = defineEmits(['like', 'nope', 'finished', 'track'])
 
 const index = ref(0)
 
@@ -46,7 +48,9 @@ defineExpose({ reset })
           :product="p"
           :active="i === 0"
           :depth="i"
+          :tracked="trackedIds.has(p.id)"
           @swiped="handleSwiped"
+          @track="emit('track', p)"
         />
       </template>
 
