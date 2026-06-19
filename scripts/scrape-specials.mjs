@@ -165,7 +165,7 @@ async function scrapeWoolies(browser) {
                 out.push({
                   code: p.Stockcode, name: p.DisplayName || p.Name, raw: p.Name,
                   size: p.PackageSize || '', was: p.WasPrice, now: p.Price,
-                  image: p.MediumImageFile || p.SmallImageFile || null,
+                  image: p.LargeImageFile || p.MediumImageFile || p.SmallImageFile || null,
                 })
               }
             }
