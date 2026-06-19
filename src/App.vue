@@ -76,15 +76,25 @@ const updatedLabel = computed(() => {
 // PWA 全面屏：测量顶部安全区高度，把顶栏整体下移，避免被系统状态栏/灵动岛遮挡。
 // 用探针元素读取已解析的 px 值（env() 写进 CSS 变量后用 getComputedStyle 读取并不可靠）。
 const safeTop = ref(0)
-onMounted(() => {
+function measureSafeTop() {
   const probe = document.createElement('div')
   probe.style.cssText =
     'position:fixed;top:0;left:0;visibility:hidden;padding-top:env(safe-area-inset-top,0px)'
   document.body.appendChild(probe)
   safeTop.value = Math.round(parseFloat(getComputedStyle(probe).paddingTop)) || 0
   probe.remove()
+}
+onMounted(() => {
+  measureSafeTop()
+  // 首帧 env() 偶尔尚未稳定（尤其 iOS 加入主屏后），下一帧再量一次；旋转/尺寸变化也重量
+  requestAnimationFrame(measureSafeTop)
+  window.addEventListener('resize', measureSafeTop)
+  window.addEventListener('orientationchange', measureSafeTop)
 })
-const barHeight = computed(() => 64 + safeTop.value)
+// 在安全区之外再留一点呼吸间距，避免品牌/按钮紧贴状态栏与灵动岛（仅在有刘海/全面屏时生效）
+const TOP_BREATHING = 10
+const topInset = computed(() => (safeTop.value > 0 ? safeTop.value + TOP_BREATHING : 0))
+const barHeight = computed(() => 64 + topInset.value)
 
 const filtered = computed(() => {
   if (filter.value === 'all') return allProducts.value
@@ -122,7 +132,7 @@ applyAccent(filter.value)
       color="transparent"
       class="topbar"
       :height="barHeight"
-      :style="{ paddingTop: safeTop + 'px' }"
+      :style="{ paddingTop: topInset + 'px' }"
     >
       <div class="brand">
         <span class="logo" aria-hidden="true">
