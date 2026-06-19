@@ -33,8 +33,12 @@ npm run preview  # 预览构建产物
 
 商品数据为 **每周定时抓取** 的当周真实特价（澳洲商超每周三上新特价），运行时由前端从 `public/products.json` 拉取：
 
-- **Woolworths** — 官网内部搜索接口 `POST /apis/ui/Search/products`，按多个品类关键词抓取并过滤 `IsOnSpecial`
-- **Coles** — 官网特价页 Next.js 数据 `GET /_next/data/{buildId}/en/on-special.json`（`buildId` 每次从首页动态解析）
+抓取用带 **stealth 插件的无头浏览器（Puppeteer）** 驱动官网：浏览器会运行 Akamai
+反爬的传感器 JS、拿到有效 cookie，从而绕过「直接 fetch 被挂起」的问题。
+
+- **Woolworths** — 访问首页拿 cookie 后，在页面内 `fetch` 内部搜索接口
+  `POST /apis/ui/Search/products`（按品类关键词搜索 + `IsOnSpecial` 过滤）
+- **Coles** — 访问特价页 `on-special`，抓取已渲染的商品卡 DOM（含 `Was` 原价），翻页累计
 
 抓取脚本：[`scripts/scrape-specials.mjs`](scripts/scrape-specials.mjs)，本地手动跑一次：
 
@@ -45,28 +49,20 @@ npm run scrape    # 重新生成 public/products.json
 每周自动更新由 GitHub Action [`update-specials.yml`](.github/workflows/update-specials.yml) 负责
 （每周三早上定时运行脚本并提交 `products.json`，也可在 Actions 页面手动触发）。
 
-### ⚠️ CI 必须配置住宅代理（`SCRAPE_PROXY`）
+### 住宅代理（可选 · `SCRAPE_PROXY`）
 
-Woolworths / Coles 前置 **Akamai 反爬会按 IP 信誉打分**：本地住宅 IP 能通过，
-但 **GitHub Actions 的云端/数据中心 IP 几乎必被拦截**（请求被重置或返回验证页），
-这会导致 CI 始终抓不到数据。重试、改 UA、换无头浏览器都救不了 —— 出口 IP 才是关键。
+Woolworths / Coles 前置 **Akamai 反爬**：除了校验传感器 cookie（已由无头浏览器解决），
+还会按 **IP 信誉**打分。住宅 IP（本地）通过；GitHub Actions 的数据中心 IP 风险分较高，
+**可能**被拦。无头浏览器 + stealth 通常足以通过，若 CI 仍抓不到数据，再加住宅代理：
 
-解决办法：让 CI 经 **住宅代理** 出站。脚本读取环境变量 `SCRAPE_PROXY`，
-设置后所有请求都经该代理发出；未设置时按直连处理（本地开发不变）。
+1. 取一个住宅代理 **代理模式** 地址，如 ScraperAPI（免费档约 1000 次/月，本项目每周约百次内）。
+   格式 `http://user:pass@proxy-host:port`。
+2. 仓库 **Settings → Secrets and variables → Actions** 新建 secret `SCRAPE_PROXY` = 该地址。
+   浏览器会经 `--proxy-server` 出站（带认证时自动 `page.authenticate`）。
+3. 日志出现 `使用住宅代理：<host>` 即生效。本地可临时验证：
+   `SCRAPE_PROXY="http://user:pass@host:port" npm run scrape`
 
-1. 注册一个住宅代理服务并取得 **代理模式** 地址，例如 ScraperAPI（免费档约 1000 次/月，
-   本项目每周约 90 次，绰绰有余）。格式形如 `http://user:pass@proxy-host:port`。
-2. 在仓库 **Settings → Secrets and variables → Actions** 新建 secret：
-   - Name：`SCRAPE_PROXY`
-   - Value：上面的代理地址
-3. 到 **Actions** 页面手动触发 `Update specials data` 验证；日志应出现 `使用住宅代理：<host>`
-   且能抓到商品。
-
-本地也可临时用代理跑一次验证：
-
-```bash
-SCRAPE_PROXY="http://user:pass@proxy-host:port" npm run scrape
-```
+> 代理出站较慢，脚本在代理模式下自动放宽导航超时到 90s（可用 `SCRAPE_TIMEOUT_MS` 覆盖）。
 
 **容错设计**：
 

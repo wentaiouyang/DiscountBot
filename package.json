@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
-    "undici": "^6.27.0",
+    "puppeteer": "^25.1.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "vue": "^3.4.27",
     "vuetify": "^3.6.7"
   },

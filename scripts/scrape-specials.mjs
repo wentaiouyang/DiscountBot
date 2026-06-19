@@ -3,25 +3,40 @@
 // 用法：node scripts/scrape-specials.mjs
 // 由 .github/workflows/update-specials.yml 每周定时运行并提交结果。
 //
-// 数据源（均为各自官网前端自用的内部接口，无需鉴权，但有反爬/限频）：
-//   Woolworths  POST /apis/ui/Search/products       关键词搜索 + IsOnSpecial 过滤
-//   Coles       GET  /_next/data/{buildId}/en/on-special.json   特价页 Next.js 数据
+// 方式（关键）：用带 stealth 插件的真实无头浏览器加载官网，让 Akamai 反爬的
+// JS 传感器正常运行、拿到有效 cookie，再取数据 —— 这样不会像直接 node fetch
+// 那样因缺少传感器 cookie 而被 Akamai 挂起/重置（这正是 CI 一直超时的原因）。
+//   Woolworths：访问首页拿 cookie，再在「页面内」fetch 内部搜索 API（按品类
+//               关键词搜索 + IsOnSpecial 过滤），返回结构化数据。
+//   Coles：访问 on-special 特价页，抓取已渲染的商品卡 DOM（含 Was 原价）。
 //
-// 设计原则：任一门店失败不影响另一门店；若两边都拿不到数据，则保留旧的 products.json 不覆盖。
+// 可选住宅代理：设 SCRAPE_PROXY=http://user:pass@host:port，浏览器经该代理出站，
+// 应对 GitHub Actions 数据中心 IP 被 Akamai 拦截的情况（浏览器 + 代理 = 最稳）。
+//
+// 设计原则：任一门店失败不影响另一门店；两边都拿不到则保留旧 products.json 不覆盖。
 
-import { writeFile, mkdir, readFile } from 'node:fs/promises'
+import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { argv, env } from 'node:process'
+import puppeteer from 'puppeteer-extra'
+import Stealth from 'puppeteer-extra-plugin-stealth'
+
+puppeteer.use(Stealth())
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = resolve(__dirname, '../public/products.json')
 
-const UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
-
 // 每个门店最多保留多少件（按折扣力度排序后截断）
 const PER_STORE = 40
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const round2 = (n) => Math.round(n * 100) / 100
+
+// 住宅代理（可选）+ 导航超时。代理出站较慢，故放宽超时；可用 SCRAPE_TIMEOUT_MS 覆盖。
+const PROXY_URL = (env.SCRAPE_PROXY || '').trim()
+const PROXY_ON = !!PROXY_URL
+const NAV_TIMEOUT = Number(env.SCRAPE_TIMEOUT_MS) || (PROXY_ON ? 90000 : 45000)
 
 // 名称 → emoji（无图时的兜底图标）
 const EMOJI_RULES = [
@@ -45,87 +60,72 @@ const EMOJI_RULES = [
   [/soap|wash|lip balm|skin|cetaphil/i, '🧼'],
   [/coffee|tea/i, '🍵'],
 ]
-function emojiFor(name = '') {
+export function emojiFor(name = '') {
   for (const [re, e] of EMOJI_RULES) if (re.test(name)) return e
   return '🛒'
 }
 
-// 把 set-cookie 头拼成可回传的 Cookie 字符串
-function cookieHeaderFrom(res) {
-  const list = res.headers.getSetCookie ? res.headers.getSetCookie() : []
-  return list.map((c) => c.split(';')[0]).join('; ')
+// 从价格文本里取数字："$3.75" → 3.75，"| Was $12.00" → 12，数字原样返回
+export function parseMoney(s) {
+  if (typeof s === 'number') return s
+  const m = String(s ?? '').match(/(\d+(?:\.\d+)?)/)
+  return m ? parseFloat(m[1]) : NaN
 }
 
-const round2 = (n) => Math.round(n * 100) / 100
+// Coles 标题形如 "Name | Size"，拆成名称与规格
+export function splitColesTitle(title = '') {
+  const [name, ...rest] = String(title).split('|')
+  return { name: name.trim(), size: rest.join('|').trim() }
+}
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+// 按折扣百分比降序，截断到 PER_STORE
+export function topByDiscount(items) {
+  return items
+    .map((p) => ({ ...p, _pct: (p.was - p.now) / p.was }))
+    .sort((a, b) => b._pct - a._pct)
+    .slice(0, PER_STORE)
+    .map(({ _pct, ...p }) => p)
+}
 
-// 单次请求超时 / 最大重试次数（应对 Akamai 反爬偶发性丢弃/重置连接）。
-// 经住宅代理时单请求常需 30-70s（代理内部会轮换/重试出口 IP），故代理模式下
-// 默认放宽到 70s；可用 SCRAPE_TIMEOUT_MS 覆盖。直连模式保持 15s。
-const PROXY_ON = !!(env.SCRAPE_PROXY || '').trim()
-const FETCH_TIMEOUT_MS = Number(env.SCRAPE_TIMEOUT_MS) || (PROXY_ON ? 70000 : 15000)
-const MAX_RETRIES = 3
-
-// 住宅代理（可选）。
-// Woolworths/Coles 的 Akamai 会按 IP 信誉打分：本地住宅 IP 能通过，
-// 而 GitHub Actions 的云端/数据中心 IP 几乎必被拦截 —— 这也是 CI 始终拿不到
-// 数据的根因。设置 SCRAPE_PROXY=http://user:pass@host:port 即可让请求经由
-// 住宅代理（如 ScraperAPI 代理模式）发出，绕过 IP 拦截。未设置时按直连处理，
-// 本地开发行为不变。
-const PROXY_URL = (env.SCRAPE_PROXY || '').trim()
-
-// 按需启用住宅代理。undici 仅在配置了代理时才动态加载：
-//  - 没配代理（本地开发）时根本不 import undici，避免它在某些 Node 版本上的
-//    加载期崩溃（如 Node 20 + undici 8 的 markAsUncloneable）拖垮整个脚本；
-//  - setGlobalDispatcher 会作用于全局 fetch（内置 fetch 与 undici 共享全局
-//    dispatcher）。不能把 ProxyAgent 当作 per-request dispatcher 传给内置 fetch
-//    （会报 UND_ERR_INVALID_ARG），必须走全局 dispatcher。
-async function setupProxy() {
-  if (!PROXY_URL) return
+// ---------------------------------------------------------------- 浏览器
+function proxyParts() {
+  if (!PROXY_ON) return null
   try {
-    const { ProxyAgent, setGlobalDispatcher } = await import('undici')
-    setGlobalDispatcher(new ProxyAgent(PROXY_URL))
-    // 不打印凭据，仅打印主机，便于在 CI 日志确认代理已生效
-    let host = PROXY_URL
-    try { host = new URL(PROXY_URL).host } catch { /* 保留原值 */ }
-    console.log(`使用住宅代理：${host}`)
-  } catch (err) {
-    console.error(`代理初始化失败（${err.message}）；将以直连方式继续。`)
+    const u = new URL(PROXY_URL)
+    return {
+      server: `${u.protocol}//${u.host}`,
+      username: decodeURIComponent(u.username || ''),
+      password: decodeURIComponent(u.password || ''),
+      host: u.host,
+    }
+  } catch {
+    return null
   }
 }
 
-// 带超时与重试的 fetch。
-// Woolworths/Coles 前置 Akamai 会偶发性重置或挂起连接，表现为 undici 的
-// "fetch failed"（TypeError，真实原因藏在 err.cause）或请求永久挂起。
-// 这里用 AbortSignal.timeout 防止挂起，并对网络错误 / 5xx / 429 做退避重试。
-export async function fetchWithRetry(
-  url,
-  init = {},
-  { retries = MAX_RETRIES, timeout = FETCH_TIMEOUT_MS, label = url } = {},
-) {
-  let lastErr
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeout) })
-      if (res.status >= 500 || res.status === 429) {
-        lastErr = new Error(`HTTP ${res.status}`)
-      } else {
-        return res
-      }
-    } catch (err) {
-      lastErr = err
-      // undici 把真实原因放在 err.cause（如 ECONNRESET / UND_ERR_SOCKET）
-      const cause = err.cause?.code || err.cause?.message || ''
-      if (attempt < retries) {
-        console.warn(
-          `  [retry ${attempt}/${retries}] ${label}: ${err.message}${cause ? ` (${cause})` : ''}`,
-        )
-      }
-    }
-    if (attempt < retries) await sleep(attempt * 800) // 线性退避：0.8s、1.6s…
+async function launchBrowser() {
+  const args = [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-blink-features=AutomationControlled',
+  ]
+  const px = proxyParts()
+  if (px) {
+    args.push(`--proxy-server=${px.server}`)
+    console.log(`使用住宅代理：${px.host}`)
   }
-  throw lastErr
+  return puppeteer.launch({ headless: true, args })
+}
+
+async function newPage(browser) {
+  const page = await browser.newPage()
+  await page.setViewport({ width: 1366, height: 900 })
+  const px = proxyParts()
+  if (px && (px.username || px.password)) {
+    await page.authenticate({ username: px.username, password: px.password })
+  }
+  return page
 }
 
 // ---------------------------------------------------------------- Woolworths
@@ -135,158 +135,147 @@ const WOOLIES_TERMS = [
   'frozen', 'juice', 'tea', 'nuts',
 ]
 
-async function scrapeWoolies() {
-  const home = await fetchWithRetry(
-    'https://www.woolworths.com.au/',
-    { headers: { 'User-Agent': UA, Accept: 'text/html' } },
-    { label: 'woolies home' },
-  )
-  const cookie = cookieHeaderFrom(home)
+async function scrapeWoolies(browser) {
+  const page = await newPage(browser)
+  // 先访问首页，让 Akamai 传感器跑起来、拿到有效 cookie
+  await page.goto('https://www.woolworths.com.au/', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT })
+  await sleep(3500)
 
   const byCode = new Map()
   for (const term of WOOLIES_TERMS) {
-    try {
-      const res = await fetchWithRetry('https://www.woolworths.com.au/apis/ui/Search/products', {
-        method: 'POST',
-        headers: {
-          'User-Agent': UA,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Origin: 'https://www.woolworths.com.au',
-          Referer: 'https://www.woolworths.com.au/shop/search/products',
-          'Request-Id': '|a.b',
-          Cookie: cookie,
-        },
-        body: JSON.stringify({
-          SearchTerm: term,
-          PageSize: 36,
-          PageNumber: 1,
-          SortType: 'TraderRelevance',
-          Location: '/shop/search/products',
-          Filters: [],
-          IsSpecial: false,
-          IsBundle: false,
-          IsMobile: false,
-        }),
-      }, { label: `woolies "${term}"` })
-      if (!res.ok) {
-        console.warn(`  [woolies] "${term}" HTTP ${res.status}`)
-        continue
-      }
-      const data = await res.json()
-      for (const group of data.Products || []) {
-        for (const p of group.Products || []) {
-          const was = p.WasPrice
-          const now = p.Price
-          if (!p.IsOnSpecial || !was || !now || was <= now) continue
-          byCode.set(p.Stockcode, {
-            store: 'Woolworths',
-            name: p.DisplayName || p.Name,
-            size: p.PackageSize || '',
-            was: round2(was),
-            now: round2(now),
-            emoji: emojiFor(p.Name),
-            image: p.MediumImageFile || p.SmallImageFile || null,
+    // 在页面内调用搜索 API —— 复用浏览器已验证的 cookie，避免被挂起
+    const r = await page
+      .evaluate(async (term) => {
+        try {
+          const res = await fetch('https://www.woolworths.com.au/apis/ui/Search/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+              SearchTerm: term, PageSize: 36, PageNumber: 1, SortType: 'TraderRelevance',
+              Location: '/shop/search/products', Filters: [], IsSpecial: false, IsBundle: false, IsMobile: false,
+            }),
           })
+          if (!res.ok) return { error: `HTTP ${res.status}` }
+          const data = await res.json()
+          const out = []
+          for (const g of data.Products || []) {
+            for (const p of g.Products || []) {
+              if (p.IsOnSpecial && p.WasPrice && p.Price && p.WasPrice > p.Price) {
+                out.push({
+                  code: p.Stockcode, name: p.DisplayName || p.Name, raw: p.Name,
+                  size: p.PackageSize || '', was: p.WasPrice, now: p.Price,
+                  image: p.MediumImageFile || p.SmallImageFile || null,
+                })
+              }
+            }
+          }
+          return { out }
+        } catch (e) {
+          return { error: e.message }
         }
-      }
-    } catch (err) {
-      const cause = err.cause?.code || err.cause?.message || ''
-      console.warn(`  [woolies] "${term}" 失败:`, err.message, cause ? `(${cause})` : '')
+      }, term)
+      .catch((e) => ({ error: e.message }))
+
+    if (r.error) {
+      console.warn(`  [woolies] "${term}" 失败: ${r.error}`)
+      await sleep(300)
+      continue
     }
-    await sleep(350) // 轻微限频
+    for (const p of r.out) {
+      byCode.set(p.code, {
+        store: 'Woolworths', name: p.name, size: p.size,
+        was: round2(p.was), now: round2(p.now),
+        emoji: emojiFor(p.raw || p.name), image: p.image,
+      })
+    }
+    await sleep(300) // 轻微限频
   }
+  await page.close()
   return [...byCode.values()]
 }
 
 // ---------------------------------------------------------------------- Coles
-async function scrapeColes() {
-  const home = await fetchWithRetry(
-    'https://www.coles.com.au/',
-    { headers: { 'User-Agent': UA, Accept: 'text/html' } },
-    { label: 'coles home' },
-  )
-  const cookie = cookieHeaderFrom(home)
-  const html = await home.text()
-  const buildId = html.match(/"buildId":"([^"]+)"/)?.[1]
-  if (!buildId) throw new Error('无法从首页解析 Coles buildId')
+const COLES_MAX_PAGES = 5
 
-  const assetsBase = html.match(/"assetsUrl":"([^"]+)"/)?.[1] ||
-    'https://cdn.productimages.coles.com.au/productimages'
+async function scrapeColes(browser) {
+  const page = await newPage(browser)
+  const ctx = browser.defaultBrowserContext()
+  await ctx.overridePermissions('https://www.coles.com.au', ['geolocation'])
+  await page.setGeolocation({ latitude: -33.8688, longitude: 151.2093 }) // 悉尼，清掉选店提示
 
   const byId = new Map()
-  for (let page = 1; page <= 4; page++) {
+  for (let pg = 1; pg <= COLES_MAX_PAGES; pg++) {
     try {
-      const url =
-        `https://www.coles.com.au/_next/data/${buildId}/en/on-special.json` +
-        (page > 1 ? `?page=${page}` : '')
-      const res = await fetchWithRetry(url, {
-        headers: {
-          'User-Agent': UA,
-          Accept: 'application/json',
-          Referer: 'https://www.coles.com.au/on-special',
-          Cookie: cookie,
-        },
-      }, { label: `coles page ${page}` })
-      if (!res.ok) {
-        console.warn(`  [coles] page ${page} HTTP ${res.status}`)
-        continue
+      await page.goto(`https://www.coles.com.au/on-special?page=${pg}`, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT })
+      const ok = await page.waitForSelector('[data-testid="product-tile"]', { timeout: 25000 }).then(() => true).catch(() => false)
+      if (!ok) {
+        console.warn(`  [coles] page ${pg} 无商品（可能被拦截或到底）`)
+        break
       }
-      const data = await res.json()
-      const results = data?.pageProps?.searchResults?.results || []
-      for (const p of results) {
-        if (p._type !== 'PRODUCT') continue
-        const pr = p.pricing || {}
-        const was = pr.was
-        const now = pr.now
-        if (!was || !now || was <= now) continue
-        const uri = (p.imageUris || [])[0]?.uri
-        byId.set(p.id ?? p.name, {
-          store: 'Coles',
-          name: p.name,
-          size: [p.brand, p.size].filter(Boolean).join(' · ') || p.size || '',
-          was: round2(was),
-          now: round2(now),
-          emoji: emojiFor(`${p.brand || ''} ${p.name}`),
-          image: uri ? assetsBase + uri : null,
+      const items = await page.evaluate(() => {
+        return [...document.querySelectorAll('[data-testid="product-tile"]')].map((el) => {
+          const title = el.querySelector('.product__title')?.textContent?.trim() || ''
+          const nowT = el.querySelector('.price__value')?.textContent?.trim() || ''
+          const m = el.textContent.match(/Was\s*\$([\d.]+)/i)
+          const rawImg = el.querySelector('[data-testid="product-image"]')?.getAttribute('src') || ''
+          const img = rawImg.includes('url=') ? decodeURIComponent(rawImg.split('url=')[1].split('&')[0]) : rawImg
+          const href = el.querySelector('a[href*="/product/"]')?.getAttribute('href') || ''
+          return { title, nowT, was: m ? m[1] : null, img, href }
         })
+      })
+
+      let added = 0
+      for (const it of items) {
+        const now = parseMoney(it.nowT)
+        const was = it.was ? parseMoney(it.was) : NaN
+        if (!it.title || !(was > now) || !(now > 0)) continue // 只要真有 Was 原价的特价
+        const id = (it.href.match(/-(\d+)(?:$|\?)/) || [])[1] || it.title
+        if (byId.has(id)) continue
+        const { name, size } = splitColesTitle(it.title)
+        byId.set(id, {
+          store: 'Coles', name, size,
+          was: round2(was), now: round2(now),
+          emoji: emojiFor(it.title), image: it.img || null,
+        })
+        added++
       }
-      if (results.length === 0) break
-    } catch (err) {
-      const cause = err.cause?.code || err.cause?.message || ''
-      console.warn(`  [coles] page ${page} 失败:`, err.message, cause ? `(${cause})` : '')
+      console.log(`  [coles] page ${pg}: +${added} 件特价`)
+      if (added === 0 && pg > 1) break // 翻页没新增，说明到底/未真正翻页
+      await sleep(500)
+    } catch (e) {
+      console.warn(`  [coles] page ${pg} 失败: ${e.message}`)
+      break
     }
-    await sleep(350)
   }
+  await page.close()
   return [...byId.values()]
 }
 
-// 按折扣百分比降序，截断到 PER_STORE
-function topByDiscount(items) {
-  return items
-    .map((p) => ({ ...p, _pct: (p.was - p.now) / p.was }))
-    .sort((a, b) => b._pct - a._pct)
-    .slice(0, PER_STORE)
-    .map(({ _pct, ...p }) => p)
-}
-
 async function main() {
-  await setupProxy()
+  let browser
+  try {
+    browser = await launchBrowser()
+  } catch (e) {
+    console.error('浏览器启动失败:', e.message)
+    process.exit(1)
+  }
+
   console.log('抓取 Woolworths…')
   let woolies = []
-  try { woolies = await scrapeWoolies() } catch (e) { console.warn('Woolworths 整体失败:', e.message) }
+  try { woolies = await scrapeWoolies(browser) } catch (e) { console.warn('Woolworths 整体失败:', e.message) }
   console.log(`  → ${woolies.length} 件特价`)
 
   console.log('抓取 Coles…')
   let coles = []
-  try { coles = await scrapeColes() } catch (e) { console.warn('Coles 整体失败:', e.message) }
+  try { coles = await scrapeColes(browser) } catch (e) { console.warn('Coles 整体失败:', e.message) }
   console.log(`  → ${coles.length} 件特价`)
+
+  await browser.close().catch(() => {})
 
   const products = [...topByDiscount(woolies), ...topByDiscount(coles)]
 
   if (products.length === 0) {
     console.error('两个门店都没抓到数据，保留现有 products.json 不覆盖。')
-    try { await readFile(OUT) } catch { /* 没有旧文件也无所谓 */ }
     process.exit(1)
   }
 
@@ -301,7 +290,7 @@ async function main() {
   console.log(`已写入 ${OUT}（共 ${products.length} 件，更新于 ${payload.updatedAt}）`)
 }
 
-// 仅在被直接运行时执行（被测试 import 时不触发网络请求）
+// 仅在被直接运行时执行（被测试 import 时不触发浏览器）
 if (argv[1] && resolve(argv[1]) === fileURLToPath(import.meta.url)) {
   main()
 }

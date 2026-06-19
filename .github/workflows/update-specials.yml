@@ -29,9 +29,10 @@ jobs:
         run: npm ci
 
       - name: Scrape specials
-        # Akamai 拦截 GitHub Actions 的数据中心 IP，必须经住宅代理发出请求。
-        # 在仓库 Settings → Secrets and variables → Actions 添加 SCRAPE_PROXY，
-        # 值形如 http://user:pass@proxy-host:port（如 ScraperAPI 代理模式）。
+        # 用带 stealth 的无头浏览器抓取（npm ci 会自动下载 Chromium）。
+        # 浏览器会跑 Akamai 传感器、拿到有效 cookie，通常能直接抓到数据。
+        # 若数据中心 IP 仍被拦，可选：在 Settings → Secrets and variables → Actions
+        # 添加 SCRAPE_PROXY=http://user:pass@host:port（住宅代理），浏览器会经其出站。
         env:
           SCRAPE_PROXY: ${{ secrets.SCRAPE_PROXY }}
         run: node scripts/scrape-specials.mjs
