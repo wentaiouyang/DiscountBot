@@ -8,7 +8,10 @@
       "Bash(gh run *)",
       "Read(//opt/homebrew/bin/**)",
       "Bash(gh --version)",
-      "Bash(node -e 'const d=require\\(\"./public/products.json\"\\); console.log\\(\"updatedAt:\",d.updatedAt,\"| count:\",d.count,\"| sources:\",JSON.stringify\\(d.sources\\)\\)')"
+      "Bash(node -e 'const d=require\\(\"./public/products.json\"\\); console.log\\(\"updatedAt:\",d.updatedAt,\"| count:\",d.count,\"| sources:\",JSON.stringify\\(d.sources\\)\\)')",
+      "Bash(/Users/abiinteriors/.claude/skills/gstack/browse/dist/browse goto *)",
+      "Bash(/Users/abiinteriors/.claude/skills/gstack/browse/dist/browse wait *)",
+      "Bash(/Users/abiinteriors/.claude/skills/gstack/browse/dist/browse screenshot *)"
     ]
   }
 }
